@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>miniparse</title>
+
+		<script src="../../res/jquery-3.2.1.min.js"></script>
+		<script src="./config.js"></script>
+		<link rel="stylesheet" href="../../res/miniparse.css" />
+
+		<script>
+
+//
+// 各種定義
+//
+var jobList = {
+	tank:   "Gld|Mrd|Pld|War|Drk",
+	healer: "Cnj|Whm|Sch|Ast",
+	dps:    "Pgl|Lnc|Arc|Rog|Thm|Acn|Mnk|Drg|Brd|Nin|Blm|Smn|Mch|Sam|Rdm",
+};
+// ペットリスト
+var petList = [
+	{ ja: "カーバンクル・エメラルド",   en: "Emerald Carbuncle" },
+	{ ja: "カーバンクル・トパーズ",     en: "Topaz Carbuncle" },
+	{ ja: "カーバンクル・ルビー",       en: "Ruby Carbuncle" },
+	{ ja: "ガルーダ・エギ",             en: "Garuda-Egi" },
+	{ ja: "タイタン・エギ",             en: "Titan-Egi" },
+	{ ja: "イフリート・エギ",           en: "Ifrit-Egi" },
+	{ ja: "デミ・バハムート",           en: "Demi-Bahamut" },
+	{ ja: "フェアリー・エオス",         en: "Eos" },
+	{ ja: "フェアリー・セレネ",         en: "Selene" },
+	{ ja: "オートタレット・ルーク",     en: "Rook Autoturret" },
+	{ ja: "オートタレット・ビショップ", en: "Bishop Autoturret" },
+];
+
+// JobOrName
+function getJobOrName(name) {
+	var res = name;
+	if (name.match(/カーバンクル/)) {
+		res = "Carbuncle";
+	} else if (name.match(/ガルーダ・エギ/)) {
+		res = "Garuda";
+	} else if (name.match(/タイタン・エギ/)) {
+		res = "Titan";
+	} else if (name.match(/イフリート・エギ/)) {
+		res = "Ifrit";
+	} else if (name.match(/フェアリー・エオス/)) {
+		res = "Eos";
+	} else if (name.match(/フェアリー・セレネ/)) {
+		res = "Selene";
+	} else if (name.match(/オートタレット/)) {
+		res = "Autoturret";
+	} else if (name.match(/デミ・バハムート/)) {
+		res = "Bahamut";
+	} else if (name.match(/^[A-Z][a-z'-]+ \([A-Z][a-z'-]+ [A-Z][a-z'-]+\)$/)) {
+		res = "Chocobo";
+	}
+	return res;
+}
+
+//
+// 表示設定
+//
+
+// エンカウント情報の定義
+var encounterDefine =
+	"[{duration}] {title} - {CurrentZoneName}<br>"
+	+ "TotalDPS: <span class='encText'>{ENCDPS}</span><br>"
+	+ "TotalDamage: <span class='encText'>{damage}</span><br>";
+
+// encounterDefine を HTML として扱うか
+var useHTMLEncounterDefine = true;
+
+// ヘッダの定義
+var headerDefine =
+[
+	{ text: "",     width: "15%",  align: "center" },
+	{ text: "DPS",  width: "80%", align: "right" },
+	{ text: "",     width: "5%",  align: "center" },
+];
+
+// 表示するデータの定義
+var bodyDefine =
+[
+	{ width: "15%", html: "<div class='jobimg' style='height:90%;'><img src='../../res/images/glow/{JobOrName}.png' onerror='$(this).attr(\"src\", \"../../res/images/error.png\");' style='height:90%;' /></div>", align: "center", valign: "middle", effect: dpsBarEffect },
+	{ text: "{encdps}", width: "80%", align: "right" },
+	{ text:"", width: "5%" },
+];
+
+
+//
+// エフェクト用スクリプト
+//
+
+// 名前置き換え処理
+function replaceName(combatant, index) {
+	var baseName = combatant.name;
+	var result = baseName;
+
+	// キャラクター名表記設定処理
+	if (baseName !== "Limit Break" || combatant.Job !== "") {
+		result = baseName.replace("(" + charaName + ")", "(YOU)");
+		switch (initial) {
+			case 0:
+				// フルネーム表記
+				result = result;
+				break;
+			case 1:
+				// イニシャル表記
+				result = result.replace(/([A-Z])[a-z]* ([A-Z])[a-z]*/, "$1. $2.");
+				break;
+			case 2:
+				// 名のみイニシャル表記
+				result = result.replace(/([A-Z])[a-z]* ([A-Z][a-z]*)/, "$1. $2");
+				break;
+			case 3:
+				// 姓のみイニシャル表記
+				result = result.replace(/([A-Z][a-z]*) ([A-Z])[a-z]*/, "$1 $2.");
+				break;
+			default:
+				// 0-3以外はフルネーム表記
+				result = result;
+		}
+	} else {
+
+	}
+	
+	// ペットの名前を英語に置き換える
+	$.each(petList, function(index, value) {
+		result = result.replace(value.ja, value.en);
+	});
+
+	return result;
+}
+
+// ロールごとに色を設定
+function setRoleColor(cell, combatant, index) {
+	var jobName = combatant.Job;
+
+	$(cell).addClass("other");
+	for (var key in jobList) {
+		var regex = new RegExp("^(" + jobList[key] + ")$", "g");
+		if (jobName.match(regex)) {
+			$(cell).removeClass("other");
+			$(cell).addClass(key.toString());
+		}
+	}
+}
+
+// 名前の色を設定
+function setNameColor(cell, combatant, index) {
+	var playerName = combatant.name;
+
+	var targetList = {
+		you: "YOU" + (charaName != "" ? "|" + charaName : ""),
+		lb: "Limit Break",
+		pet: "カーバンクル|エギ|フェアリー|オートタレット",
+		chocobo: "[A-Za-z]+ \([A-Za-z] [A-Za-z]\)",
+	};
+
+	for (var key in targetList) {
+		var regex = new RegExp("(" + targetList[key] + ")", "g");
+		if (playerName.match(regex)) {
+			$(cell).addClass(key.toString());
+		}
+	}
+}
+
+// 命中が足りてない場合に赤字
+function setAccColor(cell, combatant, index) {
+	var acc = combatant.tohit;
+	if (acc < 100) {
+		cell.style.color = "#FFA0A0";
+		cell.style.textShadow = "-1px 0 3px #802020, 0 1px 3px #802020, 1px 0 3px #802020, 0 -1px 3px #802020";
+	}
+}
+
+// DPSをグラフ化
+function dpsBarEffect(cell, combatant, index) {
+	var name = combatant.name;
+	var job = combatant.Job;
+	
+	if (index == 0 || typeof dpsBarEffect.topdeeps == 'undefined') {
+		dpsBarEffect.topdeeps = combatant.encdps;
+	}
+	var deeps = combatant.encdps;
+
+	var color;
+	if (name == "YOU") {
+		color = "rgba(220, 240, 4, 0.3)";
+	} else if (job.match(new RegExp("(" + jobList.tank + ")", "g"))) {
+		color = "rgba(41, 112, 243, 0.3)";
+	} else if (job.match(new RegExp("(" + jobList.healer + ")", "g"))) {
+		color = "rgba(107, 240, 86, 0.3)";
+	} else if (job.match(new RegExp("(" + jobList.dps + ")", "g"))) {
+		color = "rgba(200, 3, 8, 0.3)";
+	} else {
+		color = "rgba(255, 255, 255, 0.3)";
+	}
+
+	var tableRow = cell.parentNode;
+	tableRow.style.background = "-webkit-gradient(linear, left top, right top, color-stop(0.8, "+ color + "), to(rgba(24,24,24,0.0)))";
+	tableRow.style.backgroundSize = (parseInt(deeps) * 100 / parseInt(dpsBarEffect.topdeeps)) + "% 100%";
+	tableRow.style.backgroundAttachment = "fixed";
+	tableRow.style.backgroundRepeat = "no-repeat";
+}
+
+//
+// 表示用スクリプト
+//
+
+// onOverlayDataUpdate イベントを購読
+document.addEventListener("onOverlayDataUpdate", function (e) {
+	update(e.detail);
+});
+
+document.addEventListener("onOverlayStateUpdate", function (e) {
+	if (e.detail.isLocked) {
+		document.documentElement.classList.remove("resizeHandle");
+	} else {
+		document.documentElement.classList.add("resizeHandle");
+	}
+});
+
+// タイムアウト
+if (timeout_sec > 0) {
+	$(function() {
+		function timer_func() {
+			$("#encounter").text("No data to show.");
+			$("#combatantTable").empty();
+		}
+		var time_limit = timeout_sec * 1000;
+		var timer_id = setTimeout(timer_func, time_limit);
+
+		$(document).on('onOverlayDataUpdate', function() {
+			clearTimeout(timer_id);
+			timer_id = setTimeout(timer_func, time_limit);
+		});
+	});
+}
+
+// 表示要素の更新
+function update(data) {
+	updateEncounter(data);
+	if (document.getElementById("combatantTableHeader") == null) {
+		updateCombatantListHeader();
+	}
+	updateCombatantList(data);
+}
+
+// エンカウント情報を更新する
+function updateEncounter(data) {
+	// 要素取得
+	var encounterElem = document.getElementById('encounter');
+
+	// テキスト取得
+	var elementText;
+	if (typeof encounterDefine === 'function') {
+		elementText = encounterDefine(data.Encounter);
+	} else if (typeof encounterDefine === 'string') {
+		elementText = parseActFormat(encounterDefine, data.Encounter);
+	} else {
+		console.log("updateEncounter: Could not update the encounter element due to invalid type.");
+		return;
+	}
+	
+	// テキスト設定
+	if (!useHTMLEncounterDefine) {
+		encounterElem.innerText = parseActFormat(encounterDefine, data.Encounter);
+	} else {
+		// encounterElem.innerHTML = updateZoneName(parseActFormat(encounterDefine, data.Encounter));
+	encounterElem.innerHTML = parseActFormat(encounterDefine, data.Encounter);
+	}
+}
+
+// ヘッダを更新する
+function updateCombatantListHeader() {
+	var table = document.getElementById('combatantTable');
+	var tableHeader = document.createElement("thead");
+	tableHeader.id = "combatantTableHeader";
+	var headerRow = tableHeader.insertRow();
+	
+	for (var i = 0; i < headerDefine.length; i++) {
+		var cell = document.createElement("th");
+
+		// テキスト設定
+		if (typeof headerDefine[i].text !== 'undefined') {
+			cell.innerText = headerDefine[i].text;
+		} else if (typeof headerDefine[i].html !== 'undefined') {
+			cell.innerHTML = headerDefine[i].html;
+		}
+
+		// 幅設定
+		cell.style.width = headerDefine[i].width;
+		cell.style.maxWidth = headerDefine[i].width;
+
+		// 横結合数設定
+		if (typeof headerDefine[i].span !== 'undefined') {
+			cell.colSpan = headerDefine[i].span;
+		}
+
+		// 行揃え設定
+		if (typeof headerDefine[i].align !== 'undefined') {
+			cell.style["textAlign"] = headerDefine[i].align;
+		}
+
+		headerRow.appendChild(cell);
+	}
+	
+	table.tHead = tableHeader;
+}
+
+// プレイヤーリストを更新する
+function updateCombatantList(data) {
+	for (var combatantName in data.Combatant) {
+		var combatant;
+	}
+
+
+	// 要素取得＆作成
+	var table = document.getElementById('combatantTable');
+	var oldTableBody = table.tBodies.namedItem('combatantTableBody');
+	var newTableBody = document.createElement("tbody");
+	newTableBody.id = "combatantTableBody";
+
+	// tbody の内容を作成
+	var combatantIndex = 0;
+	var listID = 0;
+	for (var combatantName in data.Combatant) {
+		var combatant = data.Combatant[combatantName];
+		//var tableRow = newTableBody.insertRow(newTableBody.rows.length);
+
+		combatant.JobOrName = getJobOrName(combatant.Job || combatantName);
+		var tableRow = document.createElement("tr");
+		tableRow.id = "tr" + listID;
+		newTableBody.appendChild(tableRow);
+
+		for (var i = 0; i < bodyDefine.length; i++) {
+			var cell = tableRow.insertCell(i);
+
+			// テキスト設定
+			if (typeof bodyDefine[i].text !== 'undefined') {
+				var cellText;
+				if (typeof bodyDefine[i].text === 'function') {
+					cellText = bodyDefine[i].text(combatant, combatantIndex);
+				} else {
+					cellText = parseActFormat(bodyDefine[i].text, combatant);
+				}
+				cell.innerText = cellText;
+			} else if (typeof bodyDefine[i].html !== 'undefined') {
+				var cellHTML;
+				if (typeof bodyDefine[i].html === 'function') {
+					cellHTML = bodyDefine[i].html(combatant, combatantIndex);
+				} else {
+					cellHTML = parseActFormat(bodyDefine[i].html, combatant);
+				}
+				cell.innerHTML = cellHTML;
+			}
+
+			// 幅設定
+			cell.style.width = bodyDefine[i].width;
+			cell.style.maxWidth = bodyDefine[i].width;
+
+			// 行構え設定
+			if (typeof(bodyDefine[i].align) !== 'undefined') {
+				cell.style.textAlign = bodyDefine[i].align;
+			}
+			if (typeof(bodyDefine[i].valign) !== 'undefined') {
+				cell.style.verticalAlign = bodyDefine[i].valign;
+			}
+
+			// エフェクト実行
+			if (typeof bodyDefine[i].effect === 'function') {
+				bodyDefine[i].effect(cell, combatant, combatantIndex);
+			}
+		}
+		combatantIndex++;
+		listID++;
+	}
+	
+	// tbody が既に存在していたら置換、そうでないならテーブルに追加
+	if (oldTableBody != void(0)) {
+		table.replaceChild(newTableBody, oldTableBody);
+	} else {
+		table.appendChild(newTableBody);
+	}
+}
+
+// Miniparse フォーマット文字列を解析し、表示文字列を取得する
+function parseActFormat(str, dictionary)
+{
+	var result = "";
+	
+	var currentIndex = 0;
+	do {
+		var openBraceIndex = str.indexOf('{', currentIndex);
+		if (openBraceIndex < 0) {
+			result += str.slice(currentIndex);
+			break;
+		}
+		else {
+			result += str.slice(currentIndex, openBraceIndex);
+			var closeBraceIndex = str.indexOf('}', openBraceIndex);
+			if (closeBraceIndex < 0) {
+				// parse error!
+				console.log("parseActFormat: Parse error: missing close-brace for " + openBraceIndex.toString() + ".");
+				return "ERROR";
+			}
+			else {
+				var tag = str.slice(openBraceIndex + 1, closeBraceIndex);
+				if (typeof dictionary[tag] !== 'undefined') {
+					result += dictionary[tag];
+				} else {
+					console.log("parseActFormat: Unknown tag: " + tag);
+					result += "ERROR";
+				}
+				currentIndex = closeBraceIndex + 1;
+			}
+		}
+	} while (currentIndex < str.length);
+	
+	return result;
+}
+		</script>
+	</head>
+	<body>
+		<div id="outer">
+			<div id="inner">
+				<div id="background"></div>
+
+				<div id="encounter">
+					No data to show.
+					<!-- encounter -->
+				</div>
+				
+				<div id="combatant">
+					<table id="combatantTable">
+						<!-- header -->
+						<!-- character -->
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
