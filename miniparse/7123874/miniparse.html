@@ -17,6 +17,7 @@ var jobList = {
 	tank:   "Gld|Mrd|Pld|War|Drk",
 	healer: "Cnj|Whm|Sch|Ast",
 	dps:    "Pgl|Lnc|Arc|Rog|Thm|Acn|Mnk|Drg|Brd|Nin|Blm|Smn|Mch|Sam|Rdm",
+	other:  "Carbuncle|Garuda|Titan|Ifrit|Eos|Selene|Autoturret|Bahamut|Chocobo",
 };
 // ペットリスト
 var petList = [
@@ -57,6 +58,17 @@ function getJobOrName(name) {
 	}
 	return res;
 }
+
+// 画像読み込み
+function preloadJobIcons() {
+	for (var i in jobList) {
+		var jobs = jobList[i].split('|');
+		for (var j in jobs) {
+			 $("<img src='../../res/images/glow/" + jobs[j] + ".png'");
+		}
+	}
+}
+preloadJobIcons();
 
 //
 // 表示設定
