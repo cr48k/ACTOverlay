@@ -68,7 +68,6 @@ function preloadJobIcons() {
 		}
 	}
 }
-preloadJobIcons();
 
 //
 // 表示設定
@@ -464,6 +463,10 @@ function parseActFormat(str, dictionary)
 	
 	return result;
 }
+
+$(function() {
+	preloadJobIcons();
+});
 		</script>
 	</head>
 	<body>
