@@ -102,6 +102,9 @@
         .combatantRow.other {
             background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(255, 255, 255, 0.3)), to(rgba(24,24,24,0.0)));
         }
+        .combatantRow.you {
+            background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(220, 240, 4, 0.3)), to(rgba(24,24,24,0.0)));
+        }
         .combatantRow {
             background-attachment: fixed !important;
             background-repeat: no-repeat !important;
@@ -261,7 +264,9 @@
             return result;
         }
 
-        
+        var timeout = 60;
+        var timer_id = setTimeout(timer_func, timeout * 1000);
+       
         var miniparse = new Vue({
             el: '#miniparse',
             data: {
@@ -431,13 +436,20 @@
                 //    イベントリスナー
                 // --------------------------------------
                 dataUpdate: function (e) {
-                    var data = ActXiv; //e.detail;
+                    clearTimeout(timer_id);
+                    timer_id = setTimeout(timer_func, timeout * 1000);
+                    var data = e.detail;
                     data = this.updateData(data);
                     this.encounter = data.Encounter;
                     this.combatant = data.Combatant;
                 },
                 stateUpdate: function (e) {
                     this.isLocked = e.detail.isLocked;
+                },
+                //
+                timeOut: function () {
+                    this.encounter = {};
+                    this.combatant = {};
                 },
             },
             computed: {
@@ -454,6 +466,10 @@
                 document.removeEventListener('onOverlayStateUpdate', this.stateUpdate);
             },
         });
+
+        function timer_func() {
+            miniparse.timeOut();
+        }
     </script>
 </body>
 
