@@ -551,6 +551,7 @@
             },
             mounted: function () {
                 console.log('Miniparse overlay loaded.');
+                this.timeoutSec();
                 document.addEventListener('onOverlayDataUpdate', this.dataUpdate);
                 document.addEventListener('onOverlayStateUpdate', this.stateUpdate);
             },
