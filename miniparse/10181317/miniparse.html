@@ -17,28 +17,23 @@
             -webkit-user-select: none;
         }
 
-        html,
-        body,
-        .outer {
+        html, body, .outer {
             height: 100%;
             overflow: hidden;
             margin: 0;
             padding: 0;
         }
-
         .inner {
             position: relative;
             margin: 10px;
             padding: 10px;
         }
-
         .resizable {
             background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4zjOaXUAAAAGZJREFUOE+ljEEOACEIA92f+f9XaQ822EUgajJJC4xtvu+BPnEXFSBff7Bk5N8yw8pgW2aojLwdRHhy+YOTjMzhiUgGDB6ZjMyiVGTAgeV0rB1wqMusL7iIjrVb0mPtypMMGC7k1geoEhcn0OEM6wAAAABJRU5ErkJggg==');
             background-position: bottom right;
             background-repeat: no-repeat;
             box-sizing: border-box;
         }
-
         .background {
             position: absolute;
             top: 0;
@@ -58,11 +53,9 @@
         .al-l {
             text-align: left;
         }
-
         .al-c {
             text-align: center;
         }
-
         .al-r {
             text-align: right;
         }
@@ -70,7 +63,6 @@
         #encounter {
             padding: 0 3px;
         }
-
         #data {
             white-space: nowrap;
             margin: 5px;
@@ -83,34 +75,27 @@
             table-layout: fixed;
             border-collapse: collapse;
         }
-
         table * {
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
         }
-
         thead tr {
             border-bottom: solid 1px #DED7BE;
         }
-
         tbody tr {
             border-bottom: solid 1px rgb(122, 117, 101);
         }
-
         tr {
             height: 22px;
             margin: 0;
         }
-
-        th,
-        td {
+        th, td {
             margin: 0;
             padding: 0 3px;
             height: 2em;
             vertical-align: middle;
         }
-
         td {
             color: #E2EBF5;
             text-shadow: -1px 0 3px #217AA2, 0 1px 3px #217AA2, 1px 0 3px #217AA2, 0 -1px 3px #217AA2;
@@ -121,23 +106,18 @@
         .combatantRow.tank {
             background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(41, 112, 243, 0.3)), to(rgba(24, 24, 24, 0.0)));
         }
-
         .combatantRow.healer {
             background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(107, 240, 86, 0.3)), to(rgba(24, 24, 24, 0.0)));
         }
-
         .combatantRow.dps {
             background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(200, 3, 8, 0.3)), to(rgba(24, 24, 24, 0.0)));
         }
-
         .combatantRow.other {
             background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(255, 255, 255, 0.3)), to(rgba(24, 24, 24, 0.0)));
         }
-
         .combatantRow.you {
             background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(220, 240, 4, 0.3)), to(rgba(24, 24, 24, 0.0)));
         }
-
         .combatantRow {
             background-attachment: fixed !important;
             background-repeat: no-repeat !important;
@@ -146,13 +126,11 @@
         .job {
             padding: 0;
         }
-
         .jobimg {
             margin: 0;
             width: 18px;
             height: 18px;
         }
-
         .jobimg img {
             margin: 0;
             top: 0;
@@ -172,17 +150,14 @@
             color: #00FF00 !important;
             text-shadow: -1px 0 3px #008000, 0 1px 3px #008000, 1px 0 3px #008000, 0 -1px 3px #008000 !important;
         }
-
         .lb {
             color: #FF4600 !important;
             text-shadow: -1px 0 3px #802000, 0 1px 3px #802000, 1px 0 3px #802000, 0 -1px 3px #802000 !important;
         }
-
         .pet {
             color: #DCF404 !important;
             text-shadow: -1px 0 3px #608000, 0 1px 3px #608000, 1px 0 3px #608000, 0 -1px 3px #608000 !important;
         }
-
         .chocobo {
             color: #DCF404 !important;
             text-shadow: -1px 0 3px #608000, 0 1px 3px #608000, 1px 0 3px #608000, 0 -1px 3px #608000 !important;
@@ -200,10 +175,8 @@
             </div>
             <div id="data" v-else>
                 <div id="encounter">
-                    [{{ encounter.duration }}] {{ encounter.title }} - {{ encounter.CurrentZoneName }}
-                    <br> TotalDPS:
-                    <span class="enc">{{ encounter.ENCDPS }}</span> / TotalDamage:
-                    <span class="enc">{{ encounter.damage }}</span>
+                    [{{ encounter.duration }}] {{ encounter.title }} - {{ encounter.CurrentZoneName }} <br>
+                    TotalDPS: <span class="enc">{{ encounter.ENCDPS }}</span> / TotalDamage: <span class="enc">{{ encounter.damage }}</span>
                 </div>
                 <div id="combatant">
                     <table id="combatantTable">
@@ -537,7 +510,7 @@
             },
             mounted: function () {
                 console.log('Miniparse overlay loaded.');
-                this.timeoutSec();
+                this.timeoutSec;
                 document.addEventListener('onOverlayDataUpdate', this.dataUpdate);
                 document.addEventListener('onOverlayStateUpdate', this.stateUpdate);
             },
