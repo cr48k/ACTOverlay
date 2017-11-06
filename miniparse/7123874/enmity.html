@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Enmity</title>
+    <style>
+        * {
+            font-family: "Meiryo UI";
+            font-size: 11px;
+    
+            color: #DED7BE;
+            text-shadow: -1px 0 2px #795516, 0 1px 2px #795516, 1px 0 2px #795516, 0 -1px 2px #795516;
+            font-weight: 300;
+            line-height: 1.5em;
+    
+            -webkit-user-select: none;
+        }
+    
+        html, body, .outer {
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .inner {
+            position: relative;
+            margin: 10px;
+            padding: 10px;
+        }
+        .resizable {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4zjOaXUAAAAGZJREFUOE+ljEEOACEIA92f+f9XaQ822EUgajJJC4xtvu+BPnEXFSBff7Bk5N8yw8pgW2aojLwdRHhy+YOTjMzhiUgGDB6ZjMyiVGTAgeV0rB1wqMusL7iIjrVb0mPtypMMGC7k1geoEhcn0OEM6wAAAABJRU5ErkJggg==');
+            background-position: bottom right;
+            background-repeat: no-repeat;
+            box-sizing: border-box;
+        }
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            -webkit-filter: blur(5px);
+            z-index: -1;
+        }
+    
+        .enc {
+            color: #E2EBF5;
+            text-shadow: -1px 0 3px #217AA2, 0 1px 3px #217AA2, 1px 0 3px #217AA2, 0 -1px 3px #217AA2;
+        }
+    
+        #data {
+            white-space: nowrap;
+            margin: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #target {
+            border-bottom: 1px solid #DED7BE;
+            margin-bottom: 5px;
+        }
+
+        .box {
+            position: relative;
+        }
+        .content {
+            position: relative;
+            bottom: 0;
+            clear: both;
+            padding: 0 3px;
+        }
+
+        .gauge {
+            position: absolute;
+            display: block;
+            bottom: 2px;
+            height: 3px;
+            z-index: -1;
+        }
+        .gauge.tank {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(41, 112, 243, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+        .gauge.healer {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(107, 240, 86, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+        .gauge.dps {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(200, 3, 8, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+        .gauge.other, .gauge.pet, .gauge.unknown {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(255, 255, 255, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+        .gauge.you {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(220, 240, 4, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+
+        .gauge.green {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(38, 214, 70, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+        .gauge.yellow {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(201, 204, 36, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+        .gauge.orange {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(239, 151, 43, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+        .gauge.red {
+            background: -webkit-gradient(linear, left top, right top, color-stop(1.0, rgba(255, 45, 45, 0.3)), to(rgba(24, 24, 24, 0.0)));
+        }
+
+        .you {
+            color: #00FF00 !important;
+            text-shadow: -1px 0 3px #008000, 0 1px 3px #008000, 1px 0 3px #008000, 0 -1px 3px #008000 !important;
+        }
+        .lb {
+            color: #FF4600 !important;
+            text-shadow: -1px 0 3px #802000, 0 1px 3px #802000, 1px 0 3px #802000, 0 -1px 3px #802000 !important;
+        }
+        .pet {
+            color: #DCF404 !important;
+            text-shadow: -1px 0 3px #608000, 0 1px 3px #608000, 1px 0 3px #608000, 0 -1px 3px #608000 !important;
+        }
+        .chocobo {
+            color: #DCF404 !important;
+            text-shadow: -1px 0 3px #608000, 0 1px 3px #608000, 1px 0 3px #608000, 0 -1px 3px #608000 !important;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
+</head>
+
+<body>
+    <div id="enmity" class="outer" :class="{resizable : !isLocked}" v-cloak>
+        <div class="inner">
+            <div class="background"></div>
+            <div id="nodata" v-if="target === null">
+                No data to show.
+            </div>
+            <div id="data" v-else>
+                <div id="target">
+                    <div class="box">
+                        <div class="content">
+                            ➸ <span class="enc">{{ target.Name }}</span>
+                        </div>
+                        <div class="gauge" :class="target | hpColor" :style="'width:' + target.HPPercent + '%'"></div>
+                    </div>
+                    <div class="box">
+                        <div class="content">
+                            HP: <span class="enc">{{ target.HPPercent + (isFinite(target.HPPercent) ?  '%' : '') }}</span>
+                            <span class="enc" style="float:right;">({{ target.EffectiveDistance + (isFinite(target.EffectiveDistance) ? 'm' : '') }})</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="entries">
+                    <template v-for="(entry, i) in entries">
+                        <div class="box">
+                            <div class="content">
+                                {{ i + 1 }}. <span class="enc" :class="{you: entry.isMe, pet: entry.isPet }">{{ entry | you }}</span>
+                                <span class="enc" style="float:right;">{{ entry.EnmityString }}</span>
+                            </div>
+                            <div class="gauge" :class="entry | jobClass" :style="'width:' + entry.HateRate + '%'"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //
+        // 各種定義
+        //
+
+        // ジョブ一覧
+        var jobList = {
+            tank: 'Gld|Mrd|Pld|War|Drk',
+            healer: 'Cnj|Whm|Sch|Ast',
+            dps: 'Pgl|Lnc|Arc|Rog|Thm|Acn|Mnk|Drg|Brd|Nin|Blm|Smn|Mch|Sam|Rdm',
+            other: 'Carbuncle|Garuda|Titan|Ifrit|Eos|Selene|Autoturret|Chocobo',
+        };
+        // ペット一覧
+        var petList = [
+            { en: 'Emerald Carbuncle', ja: 'カーバンクル・エメラルド' },
+            { en: 'Topaz Carbuncle', ja: 'カーバンクル・トパーズ' },
+            { en: 'Ruby Carbuncle', ja: 'カーバンクル・ルビー' },
+            { en: 'Garuda-Egi', ja: 'ガルーダ・エギ' },
+            { en: 'Titan-Egi', ja: 'タイタン・エギ' },
+            { en: 'Ifrit-Egi', ja: 'イフリート・エギ' },
+            { en: 'Eos', ja: 'フェアリー・エオス' },
+            { en: 'Selene', ja: 'フェアリー・セレネ' },
+            { en: 'Rook Autoturret', ja: 'オートタレット・ルーク' },
+            { en: 'Bishop Autoturret', ja: 'オートタレット・ビショップ' },
+        ];
+        // ターゲットしていないときのダミーデータ
+        var noTarget = {
+            ID: 0,
+            OwnerID: 0,
+            Order: 0,
+            type: 0,
+            TargetID: 0,
+            Job: 0,
+            Level: 0,
+            Name: '―',
+            CurrentHP: 0,
+            MaxHP: 0,
+            CurrentMP: 0,
+            MaxMP: 0,
+            MaxTP: 0,
+            CurrentTP: 0,
+            PosX: 0,
+            PosY: 0,
+            PosZ: 0,
+            EffectiveDistance: '―',
+            Distance: '―',
+            HorizontalDistance: '―',
+            HPPercent: '―',
+        };
+
+        //
+        // 表示用スクリプト
+        //
+
+        // Miniparse フォーマット文字列を解析し、表示文字列を取得する
+        function parseActFormat(str, dictionary) {
+            var result = "";
+            var currentIndex = 0;
+            do {
+                var openBraceIndex = str.indexOf('{', currentIndex);
+                if (openBraceIndex < 0) {
+                    result += str.slice(currentIndex);
+                    break;
+                } else {
+                    result += str.slice(currentIndex, openBraceIndex);
+                    var closeBraceIndex = str.indexOf('}', openBraceIndex);
+                    if (closeBraceIndex < 0) {
+                        // parse error!
+                        console.log("parseActFormat: Parse error: missing close-brace for " + openBraceIndex.toString() + ".");
+                        return "ERROR";
+                    } else {
+                        var tag = str.slice(openBraceIndex + 1, closeBraceIndex);
+                        if (typeof dictionary[tag] !== 'undefined') {
+                            result += dictionary[tag];
+                        } else {
+                            console.log("parseActFormat: Unknown tag: " + tag);
+                            result += "ERROR";
+                        }
+                        currentIndex = closeBraceIndex + 1;
+                    }
+                }
+            } while (currentIndex < str.length);
+            return result;
+        }
+
+        // GETパラメータ
+        var GET = (function () {
+            var result = {};
+            var params = location.search.substring(1).split('&');
+            for (var i in params) {
+                var k = '', v = '';
+                var s = params[i].search(/=/);
+                if (s != -1) { k = params[i].slice(0, s); }
+                v = params[i].slice(params[i].indexOf('=', 0) + 1);
+                if (k != '') result[k] = decodeURI(v);
+            }
+            return result;
+        })();
+        
+        // メイン
+        var enmity = new Vue({
+            el: '#enmity',
+            data: {
+                isLocked: false,
+                target: noTarget,
+                entries: [],
+            },
+            methods: {
+                // --------------------------------------
+                //    表示用
+                // --------------------------------------
+                // 表示名
+                displayName: function (c) {
+                    var result = c.Name;
+                    for (var i in petList) {
+                        result = result.replace(petList[i].ja, petList[i].en);
+                    }
+                    return result;
+                },
+                // ジョブアイコン名
+                jobOrName: function (c) {
+                    var result = c.Job || c.name;
+                    var jn = [
+                        { regex: /^カーバンクル/, name: 'Carbuncle' },
+                        { regex: /^ガルーダ・エギ/, name: 'Garuda' },
+                        { regex: /^タイタン・エギ/, name: 'Titan' },
+                        { regex: /^イフリート・エギ/, name: 'Ifrit' },
+                        { regex: /^フェアリー・エオス/, name: 'Eos' },
+                        { regex: /^フェアリー・セレネ/, name: 'Selene' },
+                        { regex: /^オートタレット・ルーク/, name: 'Rook' },
+                        { regex: /^オートタレット・ビショップ/, name: 'Bishop' },
+                        { regex: /^[A-Z][a-z'-]+ \([A-Z][a-z'-]+ [A-Z][a-z'-]+\)$/, name: 'Chocobo' },
+                    ];
+                    for (var i in jn) {
+                        if (result.match(jn[i].regex)) { result = jn[i].name; }
+                    }
+                    return result;
+                },
+                // ロール分類
+                role: function (c) {
+                    var role = 'other';
+                    /* if (c.name == 'YOU') {
+                        role = 'you';
+                    } else*/ if (c.JobName.match(new RegExp(jobList.tank, 'gi'))) {
+                        role = 'tank';
+                    } else if (c.JobName.match(new RegExp(jobList.healer, 'gi'))) {
+                        role = 'healer';
+                    } else if (c.JobName.match(new RegExp(jobList.dps, 'gi'))) {
+                        role = 'dps';
+                    }
+                    return role;
+                },
+                // combatantRowBarSize
+                combatantRowBarSize: function (c) {
+                    var topdeeps = this.combatant[Object.keys(this.combatant)[0]].encdps;
+                    var deeps = c.encdps;
+                    return 'background-size: ' + (parseInt(deeps) * 100 / parseInt(topdeeps)) + '% 100%';
+                },
+                // nameType
+                nameType: function (c) {
+                    var result = '';
+                    if (c.name.match(new RegExp('^' + 'YOU' + (this.characterName != '' ? '|' + this.characterName : '') + '$'))) {
+                        result = 'you';
+                    } else if (c.name == 'Limit Break' && c.Job == '') {
+                        result = 'lb';
+                    } else if (c.name.match(/カーバンクル|エギ|フェアリー|オートタレット/)) {
+                        result = 'pet';
+                    } else if (c.name.match(/[A-Za-z]+ \([A-Za-z] [A-Za-z]\)/)) {
+                        result = 'chocobo';
+                    }
+                    return result;
+                },
+                // --------------------------------------
+                //    イベントリスナー
+                // --------------------------------------
+                dataUpdate: function (e) {
+                    // データ取得
+                    var data = e.detail.Enmity;
+                    // 設定
+                    this.target = data.Target ? data.Target : noTarget;
+                    this.entries = data.Entries;
+                },
+                stateUpdate: function (e) {
+                    this.isLocked = e.detail.isLocked;
+                },
+            },
+            filters: {
+                you: function (value) {
+                    return value.isMe ? 'YOU' : value.Name; //this.enmity.displayName(value);
+                },
+                jobClass: function (value) {
+                    var role = this.enmity.role(value);
+                    if (value.isPet) return 'pet';
+                    if (role != 'other') return role;
+                    return 'unknown';
+                },
+                hpColor: function (value) {
+                    if (value.HPPercent > 75) return 'green';
+                    if (value.HPPercent > 50) return 'yellow';
+                    if (value.HPPercent > 25) return 'orange';
+                    if (value.HPPercent > 0) return 'red';
+                    return '';
+                },
+            },
+            mounted: function () {
+                console.log('Enmity overlay loaded.');
+                document.addEventListener('onOverlayDataUpdate', this.dataUpdate);
+                document.addEventListener('onOverlayStateUpdate', this.stateUpdate);
+            },
+            destroyed: function () {
+                document.removeEventListener('onOverlayDataUpdate', this.dataUpdate);
+                document.removeEventListener('onOverlayStateUpdate', this.stateUpdate);
+            },
+        });
+    </script>
+</body>
+
+</html>
