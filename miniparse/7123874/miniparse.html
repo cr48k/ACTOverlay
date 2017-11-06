@@ -6,8 +6,8 @@
     <title>Croa Gunk</title>
     <style>
         * {
-            font-family: "Meiryo";
-            font-size: 11px;
+            font-family: "Meiryo UI";
+            font-size: 11.5px;
 
             color: #DED7BE;
             text-shadow: -1px 0 2px #795516, 0 1px 2px #795516, 1px 0 2px #795516, 0 -1px 2px #795516;
@@ -184,13 +184,13 @@
                             <tr>
                                 <th class="al-c job" style="width:22px;"></th>
                                 <th class="al-l" style="width:100%;">Name</th>
-                                <th class="al-c" style="width:60px;">DPS</th>
+                                <th class="al-r" style="width:55px;padding-right:15px;">DPS</th>
                                 <!--<th class="al-c" style="width:60px;">HPS</th>-->
-                                <th class="al-r" style="width:30px;">Miss</th>
+                                <th class="al-c" style="width:35px;">Miss</th>
                                 <th class="al-r" style="width:35px;">Death</th>
-                                <th class="al-c" style="width:50px;">Crit</th>
-                                <th class="al-c" style="width:50px;">DHit</th>
-                                <th class="al-r" style="width:40px;">Cr+DH</th>
+                                <th class="al-c" style="width:45px;">Crit</th>
+                                <th class="al-c" style="width:45px;">DHit</th>
+                                <th class="al-c" style="width:45px;">Cr+DH</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -204,8 +204,8 @@
                                     <td class="al-l" :class="c.nameType">{{ c.displayName }}</td>
                                     <td class="al-r">{{ c.encdps }}</td>
                                     <!--<td class="al-r">{{ c.enchps }}</td>-->
-                                    <td class="al-r" :class="{'red-if-gt-0': c.misses > 0}">{{ c.misses }}</td>
-                                    <td class="al-r" :class="{'red-if-gt-0': c.deaths > 0}">{{ c.deaths }}</td>
+                                    <td class="al-r" style="padding-right:10px;" :class="{'red-if-gt-0': c.misses > 0}">{{ c.misses }}</td>
+                                    <td class="al-r" style="padding-right:10px;" :class="{'red-if-gt-0': c.deaths > 0}">{{ c.deaths }}</td>
                                     <td class="al-r">{{ c.crithitPct }}</td>
                                     <td class="al-r">{{ c.directhitPct }}</td>
                                     <td class="al-r">{{ c.critdirecthitPct }}</td>
@@ -504,7 +504,7 @@
                     if (timeout === undefined || isNaN(timeout)) {
                         timeout = 15;
                     }
-                    console.log('Overlay timeout: ' + timeout + ' sec');
+                    console.log('Overlay timeout: ' + (timeout >= 0 ? timeout + ' sec' : 'Disabled'));
                     return timeout;
                 },
             },
