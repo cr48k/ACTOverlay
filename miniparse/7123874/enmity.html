@@ -26,7 +26,7 @@
         .inner {
             position: relative;
             margin: 10px;
-            padding: 10px;
+            padding: 0;
         }
         .resizable {
             background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABh0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4zjOaXUAAAAGZJREFUOE+ljEEOACEIA92f+f9XaQ822EUgajJJC4xtvu+BPnEXFSBff7Bk5N8yw8pgW2aojLwdRHhy+YOTjMzhiUgGDB6ZjMyiVGTAgeV0rB1wqMusL7iIjrVb0mPtypMMGC7k1geoEhcn0OEM6wAAAABJRU5ErkJggg==');
@@ -150,11 +150,16 @@
                     </div>
                 </div>
                 <div id="entries">
-                    <template v-for="(entry, i) in entries">
+                    <template v-for="(entry, i) in entries" v-if="entry.isMe || i < 12">
                         <div class="box">
-                            <div class="content">
-                                {{ i + 1 }}. <span class="enc" :class="{you: entry.isMe, pet: entry.isPet }">{{ entry | you }}</span>
-                                <span class="enc" style="float:right;">{{ entry.EnmityString }}</span>
+                            <div class="content" style="display:flex;">
+                                {{ i + 1 }}.
+                                <div class="name enc" style="padding-left:3px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+                                    <span class="enc" :class="{you: entry.isMe, pet: entry.isPet }">{{ entry | you }}</span>
+                                </div>
+                                <div class="value">
+                                    <span class="enc">{{ entry.EnmityString }}</span>
+                                </div>
                             </div>
                             <div class="gauge" :class="entry | jobClass" :style="'width:' + entry.HateRate + '%'"></div>
                         </div>
@@ -262,7 +267,8 @@
             }
             return result;
         })();
-        
+        var ActXiv = { 'Enmity': {"Target":{"ID":1073764414,"OwnerID":0,"Order":0,"type":2,"TargetID":270538525,"Job":0,"Level":50,"Name":"ティターン","CurrentHP":452044,"MaxHP":717446,"CurrentMP":2800,"MaxMP":2800,"MaxTP":1000,"CurrentTP":1000,"PosX":-114.518982,"PosY":203.02124,"PosZ":650.730957,"EffectiveDistance":0,"Distance":"4.43","HorizontalDistance":"4.42","HPPercent":"63.01"},"Focus":null,"Hover":null,"Anchor":null,"TargetOfTarget":{"ID":270538525,"OwnerID":0,"Order":72,"type":1,"TargetID":1073764414,"Job":19,"Level":50,"Name":"Tower Bam","CurrentHP":7827,"MaxHP":8985,"CurrentMP":1569,"MaxMP":1569,"MaxTP":1000,"CurrentTP":820,"PosX":-113.084656,"PosY":197.863647,"PosZ":650.731,"EffectiveDistance":6,"Distance":"7.98","HorizontalDistance":"7.98","HPPercent":"87.11"},"Entries":[{"ID":270538525,"OwnerID":0,"Name":"Tower Bam","Enmity":46925,"isMe":false,"HateRate":100,"Job":19,"JobName":"PLD","EnmityString":"46,925","isPet":false},{"ID":268835641,"OwnerID":0,"Name":"I- Risu","Enmity":22266,"isMe":false,"HateRate":47,"Job":19,"JobName":"PLD","EnmityString":"22,266","isPet":false},{"ID":268584040,"OwnerID":0,"Name":"Loco Moco","Enmity":18501,"isMe":false,"HateRate":39,"Job":20,"JobName":"MNK","EnmityString":"18,501","isPet":false},{"ID":270651026,"OwnerID":0,"Name":"Valcan Spoon","Enmity":16050,"isMe":false,"HateRate":34,"Job":30,"JobName":"NIN","EnmityString":"16,050","isPet":false},{"ID":270824402,"OwnerID":0,"Name":"Mikan Orange","Enmity":15497,"isMe":false,"HateRate":33,"Job":35,"JobName":"RDM","EnmityString":"15,497","isPet":false},{"ID":270433719,"OwnerID":0,"Name":"Yutama Leaf","Enmity":15211,"isMe":false,"HateRate":32,"Job":35,"JobName":"RDM","EnmityString":"15,211","isPet":false},{"ID":270127686,"OwnerID":0,"Name":"Satsuki Jade","Enmity":15200,"isMe":false,"HateRate":32,"Job":34,"JobName":"SAM","EnmityString":"15,200","isPet":false},{"ID":268571572,"OwnerID":0,"Name":"Teacher Lun","Enmity":15112,"isMe":false,"HateRate":32,"Job":23,"JobName":"BRD","EnmityString":"15,112","isPet":false},{"ID":270823598,"OwnerID":0,"Name":"Croa Gunk","Enmity":13627,"isMe":true,"HateRate":29,"Job":34,"JobName":"SAM","EnmityString":"13,627","isPet":false},{"ID":270781133,"OwnerID":0,"Name":"Fumi Fumi","Enmity":13061,"isMe":false,"HateRate":27,"Job":35,"JobName":"RDM","EnmityString":"13,061","isPet":false},{"ID":271057835,"OwnerID":0,"Name":"Illuminos Beldrobbaen","Enmity":13058,"isMe":false,"HateRate":27,"Job":24,"JobName":"WHM","EnmityString":"13,058","isPet":false},{"ID":270839945,"OwnerID":0,"Name":"Acryl Scryl","Enmity":12607,"isMe":false,"HateRate":26,"Job":23,"JobName":"BRD","EnmityString":"12,607","isPet":false},{"ID":271048388,"OwnerID":0,"Name":"Nyantotto Lafihna","Enmity":12425,"isMe":false,"HateRate":26,"Job":20,"JobName":"MNK","EnmityString":"12,425","isPet":false},{"ID":270842738,"OwnerID":0,"Name":"Fransowa Pamyupamyu","Enmity":12223,"isMe":false,"HateRate":26,"Job":31,"JobName":"MCH","EnmityString":"12,223","isPet":false},{"ID":270569433,"OwnerID":0,"Name":"Reimu Yukkuri","Enmity":11656,"isMe":false,"HateRate":24,"Job":25,"JobName":"BLM","EnmityString":"11,656","isPet":false},{"ID":269806698,"OwnerID":0,"Name":"Kokuryu Reed","Enmity":11461,"isMe":false,"HateRate":24,"Job":31,"JobName":"MCH","EnmityString":"11,461","isPet":false},{"ID":268654269,"OwnerID":0,"Name":"Cha Tea","Enmity":11234,"isMe":false,"HateRate":23,"Job":24,"JobName":"WHM","EnmityString":"11,234","isPet":false},{"ID":270883496,"OwnerID":0,"Name":"Sacra Fox","Enmity":11084,"isMe":false,"HateRate":23,"Job":24,"JobName":"WHM","EnmityString":"11,084","isPet":false},{"ID":271073353,"OwnerID":0,"Name":"Ione Nash","Enmity":10288,"isMe":false,"HateRate":21,"Job":24,"JobName":"WHM","EnmityString":"10,288","isPet":false},{"ID":271003433,"OwnerID":0,"Name":"Ayanami Lucile","Enmity":10012,"isMe":false,"HateRate":21,"Job":32,"JobName":"DRK","EnmityString":"10,012","isPet":false},{"ID":268754830,"OwnerID":0,"Name":"Chloe Crow","Enmity":9760,"isMe":false,"HateRate":20,"Job":25,"JobName":"BLM","EnmityString":"9,760","isPet":false},{"ID":270590323,"OwnerID":0,"Name":"Zhen Linai","Enmity":9147,"isMe":false,"HateRate":19,"Job":28,"JobName":"SCH","EnmityString":"9,147","isPet":false},{"ID":268710616,"OwnerID":0,"Name":"Suya Chan","Enmity":6446,"isMe":false,"HateRate":13,"Job":31,"JobName":"MCH","EnmityString":"6,446","isPet":false},{"ID":270736086,"OwnerID":0,"Name":"Age Falcom","Enmity":5614,"isMe":false,"HateRate":11,"Job":28,"JobName":"SCH","EnmityString":"5,614","isPet":false},{"ID":1073764420,"OwnerID":268710616,"Name":"オートタレット・ルーク","Enmity":1679,"isMe":false,"HateRate":3,"Job":0,"JobName":"UNKNOWN","EnmityString":"1,679","isPet":true},{"ID":1073764418,"OwnerID":269806698,"Name":"オートタレット・ルーク","Enmity":1487,"isMe":false,"HateRate":3,"Job":0,"JobName":"UNKNOWN","EnmityString":"1,487","isPet":true}],"AggroList":[{"ID":1073764423,"Name":"アイアンクロー","HateRate":0,"Order":82,"isCurrentTarget":false,"CurrentHP":3624,"MaxHP":3833,"Target":{"ID":270781133,"OwnerID":0,"Name":"Fumi Fumi","Enmity":0,"isMe":false,"HateRate":0,"Job":35,"JobName":"RDM","EnmityString":"","isPet":false},"HPPercent":"94.55"},{"ID":1073764422,"Name":"アイアンクロー","HateRate":0,"Order":58,"isCurrentTarget":false,"CurrentHP":2207,"MaxHP":3833,"Target":{"ID":270839945,"OwnerID":0,"Name":"Acryl Scryl","Enmity":0,"isMe":false,"HateRate":0,"Job":23,"JobName":"BRD","EnmityString":"","isPet":false},"HPPercent":"57.58"},{"ID":1073764414,"Name":"ティターン","HateRate":29,"Order":52,"isCurrentTarget":true,"CurrentHP":452044,"MaxHP":717446,"Target":{"ID":270538525,"OwnerID":0,"Name":"Tower Bam","Enmity":0,"isMe":false,"HateRate":0,"Job":19,"JobName":"PLD","EnmityString":"","isPet":false},"HPPercent":"63.01"}]} };
+
         // メイン
         var enmity = new Vue({
             el: '#enmity',
