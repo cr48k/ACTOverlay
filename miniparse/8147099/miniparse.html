@@ -372,6 +372,8 @@
                         c.critdirecthitPct = this.critdirecthitPct(c);
                         c.role = this.role(c);
                         c.nameType = this.nameType(c);
+                        c.maxHitSkill = this.maxHitSkill(c);
+                        c.maxHitDamage = this.maxHitDamage(c);
                         data.Combatant[i] = c;
                     }
                     return data;
@@ -460,6 +462,14 @@
                         result = 'chocobo';
                     }
                     return result;
+                },
+                // maxHitSkill
+                maxHitSkill: function (c) {
+                    return c.maxhit.replace(/-(\d{1,3},)*\d{1,3}$/, '');
+                },
+                // maxHitDamage
+                maxHitDamage: function (c) {
+                    return c.MAXHIT.replace(/,/g, '');
                 },
                 // --------------------------------------
                 //    イベントリスナー
