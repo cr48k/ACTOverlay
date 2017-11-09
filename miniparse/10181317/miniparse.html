@@ -217,18 +217,18 @@
             other: 'Carbuncle|Garuda|Titan|Ifrit|Eos|Selene|Autoturret|Chocobo',
         };
         // ペット一覧
-        var petList = [
-            { en: 'Emerald Carbuncle', ja: 'カーバンクル・エメラルド' },
-            { en: 'Topaz Carbuncle', ja: 'カーバンクル・トパーズ' },
-            { en: 'Ruby Carbuncle', ja: 'カーバンクル・ルビー' },
-            { en: 'Garuda-Egi', ja: 'ガルーダ・エギ' },
-            { en: 'Titan-Egi', ja: 'タイタン・エギ' },
-            { en: 'Ifrit-Egi', ja: 'イフリート・エギ' },
-            { en: 'Eos', ja: 'フェアリー・エオス' },
-            { en: 'Selene', ja: 'フェアリー・セレネ' },
-            { en: 'Rook Autoturret', ja: 'オートタレット・ルーク' },
-            { en: 'Bishop Autoturret', ja: 'オートタレット・ビショップ' },
-        ];
+        var petList = {
+            'カーバンクル・エメラルド': 'Emerald Carbuncle',
+            'カーバンクル・トパーズ': 'Topaz Carbuncle',
+            'カーバンクル・ルビー': 'Ruby Carbuncle',
+            'ガルーダ・エギ': 'Garuda-Egi',
+            'タイタン・エギ': 'Titan-Egi',
+            'イフリート・エギ': 'Ifrit-Egi',
+            'フェアリー・エオス': 'Eos',
+            'フェアリー・セレネ': 'Selene',
+            'オートタレット・ルーク': 'Rook Autoturret',
+            'オートタレット・ビショップ': 'Bishop Autoturret',
+        };
 
         //
         // 表示用スクリプト
@@ -346,33 +346,155 @@
             },
             methods: {
                 // --------------------------------------
-                //    データの追加
+                //    データの追加・更新
                 // --------------------------------------
+                // プロパティ追加
                 updateData: function (data) {
                     for (var i in data.Combatant) {
+                        // 読込
                         var c = data.Combatant[i];
+                        // 追加
+                        c.Name = this.Name(c);
+                        c.Owner = this.Owner(c);
+                        c.nameType = this.nameType(c);
                         c.displayName = this.displayName(c);
                         c.jobOrName = this.jobOrName(c);
                         c.crithitPct = this.crithitPct(c);
                         c.directhitPct = this.directhitPct(c);
                         c.critdirecthitPct = this.critdirecthitPct(c);
                         c.role = this.role(c);
-                        c.nameType = this.nameType(c);
                         c.maxHitSkill = this.maxHitSkill(c);
                         c.maxHitDamage = this.maxHitDamage(c);
+                        // 反映
                         data.Combatant[i] = c;
                     }
                     return data;
                 },
+                // ペット合算処理
+                combinePets: function (data) {
+                    var e = data.Encounter;
+                    var pets = [];
+                    for (var i in data.Combatant) {
+                        if (data.Combatant[i].Owner === null) { continue; }
+                        pets.push(i);
+                        // 読込
+                        var c = data.Combatant[i];
+                        var o = data.Combatant[(c.Owner == this.characterName ? 'YOU' : c.Owner)];
+                        // 合算
+                        {
+                            o['damage']             = String(Number(o['damage'] !== undefined ? o['damage'] : 0) + Number(c['damage'] !== undefined ? c['damage'] : 0));
+                            o['damage%']            = String(e['damage'] == 0 ? '0' : Math.floor(o['damage'] / e['damage'] * 100) + '%');
+                            //o['damage-m']           = String((o['damage'] / 1000000).toFixed(2));
+                            //o['damage-b']           = String((o['damage'] / 1000000000).toFixed(2));
+                            //o['DAMAGE-k']           = String(Math.round(o['damage'] / 1000));
+                            //o['DAMAGE-m']           = String(Math.round(o['damage-m'] / 1000000));
+                            //o['DAMAGE-b']           = String(Math.round(o['damage'] / 1000000000));
+                            o['encdps']             = String(e['DURATION'] == 0 ? '0.00' : (o['damage'] / e['DURATION']).toFixed(2));
+                            o['ENCDPS']             = String(Math.round(o['encdps']));
+                            //o['ENCDPS-k']           = String(Math.round(o['encdps'] / 1000));
+                            //o['ENCDPS-m']           = String(Math.round(o['encdps'] / 1000000));
+                            o['hits']               = String(Number(o['hits']) + Number(c['hits']));
+                            o['crithits']           = String(Number(o['crithits']) + Number(c['crithits']));
+                            o['crithit%']           = String(o['hits'] == 0 ? '0' : Math.round(o['crithits'] / o['hits'] * 100) + '%');
+                            o['misses']             = String(Number(o['misses']) + Number(c['misses']));
+                            //o['hitfailed']          = String(Number(o['hitfailed']) + Number(c['hitfailed']));
+                            o['swings']             = String(Number(o['swings']) + Number(c['swings']));
+                            o['tohit']              = String(o['swings'] == 0 ? '---' : (o['hits'] / o['swings'] * 100).toFixed(2));
+                            o['TOHIT']              = String(o['swings'] == 0 ? '---' : Math.round(o['hits'] / o['swings'] * 100));
+                            o['maxhit']             = String(Number(o['MAXHIT']) >= Number(c['MAXHIT']) ? o['maxhit'] : c['maxhit']);
+                            o['MAXHIT']             = String(Number(o['MAXHIT']) >= Number(c['MAXHIT']) ? o['MAXHIT'] : c['MAXHIT']);
+                            o['healed']             = String(Number(o['healed']) + Number(c['healed']));
+                            o['healed%']            = String(e['healed'] == 0 ? '--' : Math.floor(o['healed'] / e['healed'] * 100) + '%');
+                            o['enchps']             = String(e['DURATION'] == 0 ? '0.00' : (o['healed'] / e['DURATION']).toFixed(2));
+                            o['ENCHPS']             = String(Math.round(o['enchps']));
+                            //o['ENCHPS-k']           = String(Math.round(o['enchps'] / 1000));
+                            //o['ENCHPS-m']           = String(Math.round(o['enchps'] / 1000000));
+                            o['heals']              = String(Number(o['heals']) + Number(c['heals']));
+                            o['critheals']          = String(Number(o['critheals']) + Number(c['critheals']));
+                            o['critheal%']          = String(o['heals'] == 0 ? '0' : Math.round(o['critheals'] / o['heals'] * 100) + '%');
+                            o['cures']              = String(Number(o['cures']) + Number(c['cures']));
+                            o['maxheal']            = String(Number(o['MAXHEAL']) >= Number(c['MAXHEAL']) ? o['maxheal'] : c['maxheal']);
+                            o['MAXHEAL']            = String(Number(o['MAXHEAL']) >= Number(c['MAXHEAL']) ? o['MAXHEAL'] : c['MAXHEAL']);
+                            //o['maxhealward']        = String(Number(o['MAXHEALWARD']) >= Number(c['MAXHEALWARD']) ? o['maxhealward'] : c['maxhealward']);
+                            //o['MAXHEALWARD']        = String(Number(o['MAXHEALWARD']) >= Number(c['MAXHEALWARD']) ? o['MAXHEALWARD'] : c['MAXHEALWARD']);
+                            //o['damagetaken']        = String(Number(o['damagetaken']) + Number(c['damagetaken']));
+                            //o['healstaken']         = String(Number(o['healstaken']) + Number(c['healstaken']));
+                            //o['powerdrain']         = String(Number(o['powerdrain']) + Number(c['powerdrain']));
+                            //o['powerheal']          = String(Number(o['powerheal']) + Number(c['powerheal']));
+                            o['kills']              = String(Number(o['kills']) + Number(c['kills']));
+                            //o['deaths']             = String(Number(o['deaths']) + Number(c['deaths']));
+                            o['Last10DPS']          = String(Number(o['Last10DPS']) + Number(c['Last10DPS']));
+                            o['Last30DPS']          = String(Number(o['Last30DPS']) + Number(c['Last30DPS']));
+                            o['Last60DPS']          = String(Number(o['Last60DPS']) + Number(c['Last60DPS']));
+                            o['DirectHitCount']     = String(Number(o['DirectHitCount']) + Number(c['DirectHitCount']));
+                            o['DirectHitPct']       = String(Math.round(o['DirectHitCount'] / o['swings']) + '%');
+                            o['CritDirectHitCount'] = String(Number(o['CritDirectHitCount']) + Number(c['CritDirectHitCount']));
+                            o['CritDirectHitPct']   = String(Math.round(o['CritDirectHitCount'] / o['swings']) + '%');
+                            o['crithitPct']         = this.crithitPct(o);
+                            o['directhitPct']       = this.directhitPct(o);
+                            o['critdirecthitPct']   = this.critdirecthitPct(o);
+                            o['maxHitSkill']        = this.maxHitSkill(o);
+                            o['maxHitDamage']       = this.maxHitDamage(o);
+                        }
+                        // 反映
+                        data.Combatant[(c.Owner == this.characterName ? 'YOU' : c.Owner)] = o;
+                    }
+                    // ペットのデータを削除
+                    for (var i in pets) {
+                        delete data.Combatant[pets[i]];
+                    }
+                    // データ並び替え
+                    var c = [];
+                    for (var i in data.Combatant) {
+                        c.push(data.Combatant[i]);
+                    }
+                    c.sort((a, b) => {
+                        var encdps_a = Number(a.damage) / Number(data.Encounter.DURATION);
+                        var encdps_b = Number(b.damage) / Number(data.Encounter.DURATION);
+                        var r = 0;
+                        if (encdps_a > encdps_b) { r = 1; }
+                        else if (encdps_a < encdps_b) { r = -1; }
+                        return -r;
+                    });
+                    var combatant = {};
+                    for (var i in c) {
+                        combatant[c[i].name] = c[i];
+                    }
+                    data.Combatant = combatant;
+
+                    return data;
+                },
                 // --------------------------------------
-                //    表示用
+                //    プロパティ追加用
                 // --------------------------------------
+                // Name
+                Name: function (c) {
+                    var r = c.name.match(/^(.*?)(?: \((.*)\))?$/);
+                    return r[1];
+                },
+                // Owner
+                Owner: function (c) {
+                    var r = c.name.match(/^(.*?)(?: \((.*)\))?$/);
+                    return (r[2] === undefined ? null : r[2]);
+                },
+                // nameType
+                nameType: function (c) {
+                    var result = '';
+                    if (c.name.match(new RegExp('^' + 'YOU' + (this.characterName != '' ? '|' + this.characterName : '') + '$'))) {
+                        result = 'you';
+                    } else if (c.name == 'Limit Break' && c.Job == '') {
+                        result = 'lb';
+                    } else if (c.name.match(/カーバンクル|エギ|フェアリー|オートタレット/)) {
+                        result = 'pet';
+                    } else if (c.name.match(/[A-Za-z]+ \([A-Za-z] [A-Za-z]\)/)) {
+                        result = 'chocobo';
+                    }
+                    return result;
+                },
                 // 表示名
                 displayName: function (c) {
                     var result = c.name;
-                    for (var i in petList) {
-                        result = result.replace(petList[i].ja, petList[i].en);
-                    }
+                    if (c.nameType == 'pet') { result = result.replace(c.Name, petList[c.Name]); }
                     return result;
                 },
                 // ジョブアイコン名
@@ -396,23 +518,23 @@
                 },
                 // クリティカル率
                 crithitPct: function (c) {
-                    var hits = c.hits;
+                    var swings = c.swings;
                     var crithits = c.crithits - c.CritDirectHitCount;
-                    var pct = (hits == 0 ? 0.0 : 100.0 * crithits / hits);
+                    var pct = (swings == 0 ? 0.0 : 100.0 * crithits / swings);
                     return pct.toFixed(1) + '%';
                 },
                 // ダイレクトヒット率
                 directhitPct: function (c) {
-                    var hits = c.hits;
+                    var swings = c.swings;
                     var directhits = c.DirectHitCount - c.CritDirectHitCount;
-                    var pct = (hits == 0 ? 0.0 : 100.0 * directhits / hits);
+                    var pct = (swings == 0 ? 0.0 : 100.0 * directhits / swings);
                     return pct.toFixed(1) + '%';
                 },
                 // クリティカル+ダイレクトヒット率
                 critdirecthitPct: function (c) {
-                    var hits = c.hits;
+                    var swings = c.swings;
                     var critdirecthits = c.CritDirectHitCount;
-                    var pct = (hits == 0 ? 0.0 : 100.0 * critdirecthits / hits);
+                    var pct = (swings == 0 ? 0.0 : 100.0 * critdirecthits / swings);
                     return pct.toFixed(1) + '%';
                 },
                 // ロール分類
@@ -429,26 +551,6 @@
                     }
                     return role;
                 },
-                // combatantRowBarSize
-                combatantRowBarSize: function (c) {
-                    var topdeeps = this.combatant[Object.keys(this.combatant)[0]].encdps;
-                    var deeps = c.encdps;
-                    return 'background-size: ' + (parseInt(deeps) * 100 / parseInt(topdeeps)) + '% 100%';
-                },
-                // nameType
-                nameType: function (c) {
-                    var result = '';
-                    if (c.name.match(new RegExp('^' + 'YOU' + (this.characterName != '' ? '|' + this.characterName : '') + '$'))) {
-                        result = 'you';
-                    } else if (c.name == 'Limit Break' && c.Job == '') {
-                        result = 'lb';
-                    } else if (c.name.match(/カーバンクル|エギ|フェアリー|オートタレット/)) {
-                        result = 'pet';
-                    } else if (c.name.match(/[A-Za-z]+ \([A-Za-z] [A-Za-z]\)/)) {
-                        result = 'chocobo';
-                    }
-                    return result;
-                },
                 // maxHitSkill
                 maxHitSkill: function (c) {
                     return c.maxhit.replace(/-(\d{1,3},)*\d{1,3}$/, '');
@@ -458,22 +560,13 @@
                     return c.MAXHIT.replace(/,/g, '');
                 },
                 // --------------------------------------
-                //    イベントリスナー
+                //    表示用
                 // --------------------------------------
-                dataUpdate: function (e) {
-                    // データ取得
-                    var _isActive = this.isActive;
-                    var data = e.detail;
-                    data = this.updateData(data);
-                    // 設定
-                    this.isActive = data.isActive;
-                    if (this.isActive === true || _isActive !== null) {
-                        this.encounter = data.Encounter;
-                        this.combatant = data.Combatant;
-                    }
-                },
-                stateUpdate: function (e) {
-                    this.isLocked = e.detail.isLocked;
+                // DPSグラフの幅
+                combatantRowBarSize: function (c) {
+                    var topdeeps = this.combatant[Object.keys(this.combatant)[0]].encdps;
+                    var deeps = c.encdps;
+                    return 'background-size: ' + (parseInt(deeps) * 100 / parseInt(topdeeps)) + '% 100%';
                 },
                 // タイムアウト
                 timeout: function (sec) {
@@ -490,18 +583,46 @@
                         cancel: () => { clearTimeout(timeout); }
                     };
                 },
+                // --------------------------------------
+                //    イベントリスナー
+                // --------------------------------------
+                dataUpdate: function (e) {
+                    // ACTの状態を取得
+                    var _isActive = this.isActive;
+                    // イベントからデータを取得
+                    var data = e.detail;
+                    data = this.updateData(data);
+                    if (GET.pet !== undefined && GET.pet == '1') { data = this.combinePets(data); }
+                    // データを設定
+                    this.isActive = data.isActive;
+                    if (this.isActive === true || _isActive !== null || GET.debug == '1') {
+                        this.encounter = data.Encounter;
+                        this.combatant = data.Combatant;
+                    }
+                },
+                stateUpdate: function (e) {
+                    this.isLocked = e.detail.isLocked;
+                },
             },
             computed: {
                 characterName: function () {
                     return document.getElementsByTagName('title')[0].innerText;
                 },
+                // End Encounterしてから「No data to show.」が表示されるまでの時間
                 timeoutSec: function () {
                     var timeout = GET.timeout;
                     if (timeout === undefined || isNaN(timeout)) {
+                        // デフォルトで15秒に設定
                         timeout = 15;
                     }
                     console.log('Overlay timeout: ' + (timeout >= 0 ? timeout + ' sec' : 'Disabled'));
                     return timeout;
+                },
+                debugMode: function () {
+                    var debug = GET.debug;
+                    if (debug !== undefined && debug == '1') {
+                    console.log('Debug mode enabled.');
+                    }
                 },
             },
             watch: {
@@ -521,6 +642,7 @@
             mounted: function () {
                 console.log('Miniparse overlay loaded.');
                 this.timeoutSec;
+                this.debugMode;
                 document.addEventListener('onOverlayDataUpdate', this.dataUpdate);
                 document.addEventListener('onOverlayStateUpdate', this.stateUpdate);
             },
