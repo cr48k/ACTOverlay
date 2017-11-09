@@ -376,6 +376,7 @@
                     var pets = [];
                     for (var i in data.Combatant) {
                         if (data.Combatant[i].Owner === null) { continue; }
+                        if (GET.pet != '2' && data.Combatant[i].nameType == 'chocobo') { continue; }
                         pets.push(i);
                         // 読込
                         var c = data.Combatant[i];
@@ -486,7 +487,7 @@
                         result = 'lb';
                     } else if (c.name.match(/カーバンクル|エギ|フェアリー|オートタレット/)) {
                         result = 'pet';
-                    } else if (c.name.match(/[A-Za-z]+ \([A-Za-z] [A-Za-z]\)/)) {
+                    } else if (c.name.match(/^[A-Z][a-z'-]+ \([A-Z][a-z'-]+ [A-Z][a-z'-]+\)$/)) {
                         result = 'chocobo';
                     }
                     return result;
@@ -592,7 +593,7 @@
                     // イベントからデータを取得
                     var data = e.detail;
                     data = this.updateData(data);
-                    if (GET.pet !== undefined && GET.pet == '1') { data = this.combinePets(data); }
+                    if (GET.pet !== undefined && (GET.pet == '1' || GET.pet == '2')) { data = this.combinePets(data); }
                     // データを設定
                     this.isActive = data.isActive;
                     if (this.isActive === true || _isActive !== null || GET.debug == '1') {
