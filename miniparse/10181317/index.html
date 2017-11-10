@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>Miniparse Config</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.3/vue.min.js" integrity="sha384-V3g5AcPUdecefoI4suVGdjcIZzMG129Xa/UtYeVxdJfFxCQ7jRZhi/NU3+bmPSWm" crossorigin="anonymous"></script>
+</head>
+
+<body style="padding-top:5rem">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="">Miniparse Config</a>
+    </nav>
+
+    <main id="app" role="main" class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <form>
+                    <div class="form-group">
+                        <div class="custom-controls-stacked">
+                            <label>
+                                <span class="font-weight-bold">End Encounter後にオーバーレイをリセットする</span><br>
+                                <small>End Encounter後にNo data to show.が表示されるまでの時間を設定できます。</small>
+                            </label>
+                            <label class="custom-control custom-radio">
+                                <input type="radio" name="timeout-enabled" value="0" class="custom-control-input" v-model="timeout_enabled">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">無効</span>
+                            </label>
+                            <label class="custom-control custom-radio">
+                                <input type="radio" name="timeout-enabled" value="1" class="custom-control-input" v-model="timeout_enabled">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">有効</span>
+                            </label>
+                        </div>
+                        <div style="margin-left:1.5rem" class="form-group">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" name="change-timeout-sec" class="custom-control-input" v-model="timeout_change_timeout_sec" :disabled="timeout_enabled=='0'">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">リセットまでの時間を変更する</span>
+                            </label>
+                            <div style="margin-left:1.5rem" class="form-group form-inline row">
+                                <label :style="timeout_enabled=='0' || !timeout_change_timeout_sec ? 'color:#868e96' : ''">
+                                    リセットまでの時間(秒):
+                                    <input type="number" name="timeout-sec" value="15" style="width:5rem" class="form-control ml-3 mr-1" v-model="timeout_timeout_sec" :disabled="timeout_enabled=='0' || !timeout_change_timeout_sec">秒
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-controls-stacked">
+                            <label>
+                                <span class="font-weight-bold">ペットのデータをオーナーに合算する</span><br>
+                                <small>エギなどのペットのデータをオーナーに合算させて表示できます。</small>
+                            </label>
+                            <label class="custom-control custom-radio">
+                                <input type="radio" name="combine-pet-enabled" value="0" class="custom-control-input" v-model="combine_mode">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">しない</span>
+                            </label>
+                            <label class="custom-control custom-radio">
+                                <input type="radio" name="combine-pet-enabled" value="1" class="custom-control-input" v-model="combine_mode">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">する (カーバンクル・エギ・オートタレット・フェアリー)</span>
+                            </label>
+                            <label class="custom-control custom-radio">
+                                <input type="radio" name="combine-pet-enabled" value="2" class="custom-control-input" v-model="combine_mode">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">する (カーバンクル・エギ・オートタレット・フェアリー・チョコボ)</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="mt-sm-2">
+            <div class="form-group">
+                <label>
+                    <span class="font-weight-bold">表示するURL</span><br>
+                    <small>以下のURLを、ACT内Plugins→OverlayPlugin.dll→Mini Parse の「表示するURL」に設定してください。</small>
+                </label>
+                <input type="text" class="form-control" v-model="url">
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // https://developer.mozilla.org/ja/docs/Web/API/Document/cookie
+        var docCookies = {
+            getItem: function (sKey) {
+                if (!sKey || !this.hasItem(sKey)) { return null; }
+                return unescape(document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1"));
+            },
+            setItem: function (sKey, sValue, vEnd, sPath, sDomain, bSecure) {
+                if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) { return; }
+                var sExpires = "";
+                if (vEnd) {
+                    switch (vEnd.constructor) {
+                        case Number:
+                            sExpires = vEnd === Infinity ? "; expires=Tue, 19 Jan 2038 03:14:07 GMT" : "; max-age=" + vEnd;
+                            break;
+                        case String:
+                            sExpires = "; expires=" + vEnd;
+                            break;
+                        case Date:
+                            sExpires = "; expires=" + vEnd.toGMTString();
+                            break;
+                    }
+                }
+                document.cookie = escape(sKey) + "=" + escape(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
+            },
+            removeItem: function (sKey, sPath) {
+                if (!sKey || !this.hasItem(sKey)) { return; }
+                document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + (sPath ? "; path=" + sPath : "");
+            },
+            hasItem: function (sKey) {
+                return (new RegExp("(?:^|;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+            },
+            keys: function () {
+                var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
+                for (var nIdx = 0; nIdx < aKeys.length; nIdx++) { aKeys[nIdx] = unescape(aKeys[nIdx]); }
+                return aKeys;
+            }
+        };
+        
+        var app = new Vue({
+            el: '#app',
+            data: {
+                timeout_enabled: '1',
+                timeout_change_timeout_sec: false,
+                timeout_timeout_sec: '15',
+                combine_mode: '0',
+            },
+            computed: {
+                url: function () {
+                    var base = String(location.origin + location.pathname).replace(/\/[^/]*$/, '/miniparse.html');
+
+                    var params = [];
+                    // リセット時間
+                    if (this.timeout_enabled == '0') {
+                        params.push('timeout=-1');
+                    } else {
+                        if (this.timeout_change_timeout_sec) {
+                            params.push('timeout=' + this.timeout_timeout_sec);
+                        }
+                    }
+                    // ペット合算
+                    if (this.combine_mode != '0') {
+                        params.push('pet=' + this.combine_mode);
+                    }
+
+                    var url = encodeURI(base + (params.length > 0 ? '?' + params.join('&') : ''));
+                    return url;
+                },
+            },
+            watch: {
+                timeout_enabled: function (val) { docCookies.setItem('timeout_enabled', val, 60*60*24*365); },
+                timeout_change_timeout_sec: function (val) { docCookies.setItem('timeout_change_timeout_sec', val, 60*60*24*365); },
+                timeout_timeout_sec: function (val) { docCookies.setItem('timeout_timeout_sec', val, 60*60*24*365); },
+                combine_mode: function (val) { docCookies.setItem('combine_mode', val, 60*60*24*365); },
+            },
+            mounted: function () {
+                if (docCookies.hasItem('timeout_enabled')) {
+                    this.timeout_enabled = docCookies.getItem('timeout_enabled');
+                } else {
+                    docCookies.setItem('timeout_enabled', this.timeout_enabled, 60*60*24*365);
+                }
+                if (docCookies.hasItem('timeout_change_timeout_sec')) {
+                    this.timeout_change_timeout_sec = docCookies.getItem('timeout_change_timeout_sec') == 'true';
+                } else {
+                    docCookies.setItem('timeout_change_timeout_sec', this.timeout_change_timeout_sec, 60*60*24*365);
+                }
+                if (docCookies.hasItem('timeout_timeout_sec')) {
+                    this.timeout_timeout_sec = docCookies.getItem('timeout_timeout_sec');
+                } else {
+                    docCookies.setItem('timeout_timeout_sec', this.timeout_timeout_sec, 60*60*24*365);
+                }
+                if (docCookies.hasItem('combine_mode')) {
+                    this.combine_mode = docCookies.getItem('combine_mode');
+                } else {
+                    docCookies.setItem('combine_mode', this.combine_mode, 60*60*24*365);
+                }
+            },
+        });
+    </script>
+</body>
+
+</html>
