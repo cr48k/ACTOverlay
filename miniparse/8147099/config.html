@@ -83,7 +83,10 @@
                     <span class="font-weight-bold">表示するURL</span><br>
                     <small>以下のURLを、ACT内Plugins→OverlayPlugin.dll→Mini Parse の「表示するURL」に設定し、［オーバーレイの表示をリロード］をクリックしてください。</small>
                 </label>
-                <input type="text" class="form-control" v-model="url" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" v-model="url" readonly>
+                    <span class="input-group-btn"><a id="copy-btn" tabindex="-1" class="btn btn-primary" role="button" data-toggle="popover" data-placement="top" data-trigger="focus" :data-content="urlCopyResult" @click="copyURL">コピー</a></span>
+                </div>
             </div>
         </div>
     </main>

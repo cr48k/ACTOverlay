@@ -44,6 +44,7 @@ var app = new Vue({
         timeout_change_timeout_sec: false,
         timeout_timeout_sec: '15',
         combine_mode: '0',
+        urlCopyResult: 'クリップボードにコピーしました',
     },
     computed: {
         url: function () {
@@ -72,6 +73,25 @@ var app = new Vue({
         timeout_change_timeout_sec: function (val) { docCookies.setItem('timeout_change_timeout_sec', val, cookieMaxAge); },
         timeout_timeout_sec: function (val) { docCookies.setItem('timeout_timeout_sec', val, cookieMaxAge); },
         combine_mode: function (val) { docCookies.setItem('combine_mode', val, cookieMaxAge); },
+    },
+    methods: {
+        copyURL: function () {
+            var temp = document.createElement('div');
+            temp.appendChild(document.createElement('pre')).textContent = this.url;
+            var style = temp.style;
+            style.position = 'fixed';
+            style.left = '-100%';
+            document.body.appendChild(temp);
+            document.getSelection().selectAllChildren(temp);
+            var result = document.execCommand('copy');
+            document.body.removeChild(temp);
+            if (result) {
+                this.urlCopyResult = 'クリップボードにコピーしました';
+            } else {
+                this.urlCopyResult = 'クリップボードへのコピーに失敗しました';
+            }
+            $('#copy-btn').popover({ trigger: 'focus' });
+        },
     },
     mounted: function () {
         if (docCookies.hasItem('timeout_enabled')) {
