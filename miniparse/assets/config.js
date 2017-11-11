@@ -90,7 +90,16 @@ var app = new Vue({
             } else {
                 this.urlCopyResult = 'クリップボードへのコピーに失敗しました';
             }
-            $('#copy-btn').popover({ trigger: 'focus' });
+            
+            $('#copy-btn').popover({
+                trigger: 'manual',
+                placement: 'top',
+                content: this.urlCopyResult,
+            });
+            $('#copy-btn').popover('show');
+            $('html').on('click', () => {
+                $('#copy-btn').popover('hide');
+            });
         },
     },
     mounted: function () {
