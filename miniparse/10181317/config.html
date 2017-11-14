@@ -55,6 +55,24 @@
                     <div class="form-group">
                         <div class="custom-controls-stacked">
                             <label>
+                                <span class="font-weight-bold">非アクティブ時の挙動</span><br>
+                                <small>非アクティブになったときにNo data to show.を非表示にすることができます。</small>
+                            </label>
+                            <label class="custom-control custom-radio">
+                                <input type="radio" name="hideWhenInactive_mode" value="1" class="custom-control-input" v-model="hideWhenInactive_mode">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">何も表示しない</span>
+                            </label>
+                            <label class="custom-control custom-radio">
+                                <input type="radio" name="hideWhenInactive_mode" value="0" class="custom-control-input" v-model="hideWhenInactive_mode">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">No data to show.を表示する</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-controls-stacked">
+                            <label>
                                 <span class="font-weight-bold">ペットのデータをオーナーに合算する</span><br>
                                 <small>エギなどのペットのデータをオーナーに合算させて表示できます。</small>
                             </label>
@@ -92,7 +110,7 @@
         </div>
     </main>
 
-    <script src="../assets/config.js?2017111101"></script>
+    <script src="../assets/config.js?2017111401"></script>
 </body>
 
 </html>

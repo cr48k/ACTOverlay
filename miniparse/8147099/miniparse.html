@@ -45,6 +45,10 @@
             z-index: -1;
         }
 
+        .hidden {
+            display: none;
+        }
+
         .enc {
             color: #E2EBF5;
             text-shadow: -1px 0 3px #217AA2, 0 1px 3px #217AA2, 1px 0 3px #217AA2, 0 -1px 3px #217AA2;
@@ -167,7 +171,7 @@
 </head>
 
 <body>
-    <div id="miniparse" class="outer" :class="{resizable : !isLocked}" v-cloak>
+    <div id="miniparse" class="outer" :class="{resizable : !isLocked, hidden : Object.keys(combatant).length==0&&hideWhenInactive}" v-cloak>
         <div class="inner">
             <div class="background"></div>
             <div id="nodata" v-if="Object.keys(combatant).length == 0">
@@ -618,6 +622,20 @@
                 stateUpdate: function (e) {
                     this.isLocked = e.detail.isLocked;
                 },
+                showConfig: function () {
+                    var msg = 'Miniparse overlay loaded.';
+                    msg += ' (';
+
+                    // timeoutSec
+                    msg += 'Timeout: ' + (this.timeoutSec >= 0 ? this.timeoutSec + ' sec' : 'Disabled');
+                    // hideWhenInactive
+                    msg += ', HideWhenInactive: ' + (this.hideWhenInactive ? 'true' : 'false');
+                    // debugMode
+                    if (this.debugMode) { msg += ', DebugMode: Enabled'; }
+
+                    msg += ')';
+                    console.log(msg);
+                },
             },
             computed: {
                 characterName: function () {
@@ -630,14 +648,21 @@
                         // デフォルトで15秒に設定
                         timeout = 15;
                     }
-                    console.log('Overlay timeout: ' + (timeout >= 0 ? timeout + ' sec' : 'Disabled'));
                     return timeout;
                 },
-                debugMode: function () {
-                    var debug = GET.debug;
-                    if (debug !== undefined && debug == '1') {
-                    console.log('Debug mode enabled.');
+                hideWhenInactive: function () {
+                    var mode = GET.hideWhenInactive;
+                    if (mode !== undefined && mode == '1') {
+                        return true;
                     }
+                    return false;
+                },
+                debugMode: function () {
+                    var mode = GET.debug;
+                    if (mode !== undefined && mode == '1') {
+                        return true;
+                    }
+                    return false;
                 },
             },
             watch: {
@@ -655,9 +680,7 @@
                 },
             },
             mounted: function () {
-                console.log('Miniparse overlay loaded.');
-                this.timeoutSec;
-                this.debugMode;
+                this.showConfig();
                 document.addEventListener('onOverlayDataUpdate', this.dataUpdate);
                 document.addEventListener('onOverlayStateUpdate', this.stateUpdate);
             },

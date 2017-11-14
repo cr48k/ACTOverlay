@@ -44,6 +44,7 @@ var app = new Vue({
         timeout_change_timeout_sec: false,
         timeout_timeout_sec: '15',
         combine_mode: '0',
+        hideWhenInactive_mode: '0',
         urlCopyResult: 'クリップボードにコピーしました',
     },
     computed: {
@@ -63,6 +64,10 @@ var app = new Vue({
             if (this.combine_mode != '0') {
                 params.push('pet=' + this.combine_mode);
             }
+            // 非アクティブ時の挙動
+            if (this.hideWhenInactive_mode != '0') {
+                params.push('hideWhenInactive=' + this.hideWhenInactive_mode);
+            }
 
             var url = encodeURI(base + (params.length > 0 ? '?' + params.join('&') : ''));
             return url;
@@ -73,6 +78,7 @@ var app = new Vue({
         timeout_change_timeout_sec: function (val) { docCookies.setItem('timeout_change_timeout_sec', val, cookieMaxAge); },
         timeout_timeout_sec: function (val) { docCookies.setItem('timeout_timeout_sec', val, cookieMaxAge); },
         combine_mode: function (val) { docCookies.setItem('combine_mode', val, cookieMaxAge); },
+        hideWhenInactive_mode: function (val) { docCookies.setItem('hideWhenInactive_mode', val, cookieMaxAge); },
     },
     methods: {
         copyURL: function () {
@@ -122,6 +128,11 @@ var app = new Vue({
             this.combine_mode = docCookies.getItem('combine_mode');
         } else {
             docCookies.setItem('combine_mode', this.combine_mode, cookieMaxAge);
+        }
+        if (docCookies.hasItem('hideWhenInactive_mode')) {
+            this.hideWhenInactive_mode = docCookies.getItem('hideWhenInactive_mode');
+        } else {
+            docCookies.setItem('hideWhenInactive_mode', this.hideWhenInactive_mode, cookieMaxAge);
         }
     },
 });
