@@ -672,7 +672,7 @@
                         if (this.overlayTimeout !== null) { this.overlayTimeout.cancel(); }
                     } else {
                         if (this.timeoutSec >= 0) {
-                            this.overlayTaaimeout = this.timeout(this.timeoutSec);
+                            this.overlayTimeout = this.timeout(this.timeoutSec);
                             this.overlayTimeout.promise.then((result) => {
                                 this.overlayTimeout = null;
                             });
