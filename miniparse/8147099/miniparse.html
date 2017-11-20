@@ -400,6 +400,7 @@
                         var c = data.Combatant[i];
                         var o = data.Combatant[(c.Owner == this.characterName ? 'YOU' : c.Owner)];
                         // 合算
+                        if (o === undefined) { continue; }
                         {
                             o['damage']             = String(Number(o['damage'] !== undefined ? o['damage'] : 0) + Number(c['damage'] !== undefined ? c['damage'] : 0));
                             o['damage%']            = String(e['damage'] == 0 ? '0' : Math.floor(o['damage'] / e['damage'] * 100) + '%');
@@ -671,7 +672,7 @@
                         if (this.overlayTimeout !== null) { this.overlayTimeout.cancel(); }
                     } else {
                         if (this.timeoutSec >= 0) {
-                            this.overlayTimeout = this.timeout(this.timeoutSec);
+                            this.overlayTaaimeout = this.timeout(this.timeoutSec);
                             this.overlayTimeout.promise.then((result) => {
                                 this.overlayTimeout = null;
                             });
