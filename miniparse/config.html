@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>Miniparse Config</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js" integrity="sha256-1Q2q5hg2YXp9fYlM++sIEXOcUb8BRSDUsQ1zXvLBqmA=" crossorigin="anonymous"></script>
+    <style>
+    html {
+        position: relative;
+        min-height: 100%;
+        overflow-y: scroll;
+    }
+    body {
+        margin-bottom: 80px;
+        padding-top:5rem;
+    }
+    .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        /* Set the fixed height of the footer here */
+        height: 60px;
+        line-height: 60px; /* Vertically center the text there */
+        background-color: #f5f5f5;
+    }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+            <a class="navbar-brand" href="">Miniparse Config</a>
+        </nav>
+    </header>
+
+    <main id="app" role="main" class="container-fluid" v-cloak>
+        <div class="card mb-2">
+            <div class="card-body">
+                <form>
+                    <div class="form-group">
+                        <label>
+                            <span class="font-weight-bold">プレイヤーキャラクター名</span><br>
+                            <small>自身のプレイヤーキャラクター名を入力してください。（複数の場合はカンマ区切りで入力）</small>
+                        </label>
+                        <input type="text" style="max-width:40rem;" class="form-control" spellcheck="false" v-model="characterName">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <span class="font-weight-bold">オーバーレイのリセット</span><br>
+                            <small>End Encounter後にNo data to show.が表示されるまでの時間を設定できます。</small>
+                        </label>
+                        <div class="custom-control custom-radio">
+                            <label>
+                                <input type="radio" name="timeout-enabled" value="0" class="custom-control-input" v-model="timeout.enabled">
+                                <span class="custom-control-label">無効</span>
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <label>
+                                <input type="radio" name="timeout-enabled" value="1" class="custom-control-input" v-model="timeout.enabled">
+                                <span class="custom-control-label">有効</span>
+                            </label>
+                        </div>
+                        <div style="margin-left:1.5rem;" class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <label>
+                                    <input type="checkbox" class="custom-control-input" v-model="timeout.changeSec" :disabled="timeout.enabled==='0'">
+                                    <span class="custom-control-label">リセットまでの時間を変更する</span>
+                                </label>
+                            </div>
+                            <div style="margin-left:1.5rem;" class="form-group form-inline">
+                                <label :style="timeout.enabled==='0'||!timeout.changeSec?'color:#868e96':''">
+                                    リセットまでの時間:
+                                    <input type="number" name="timeout-sec" style="width:4rem;" class="form-control ml-3 mr-1" v-model="timeout.sec" :disabled="timeout.enabled==='0'||!timeout.changeSec">
+                                    秒
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <span class="font-weight-bold">非アクティブ時の挙動</span><br>
+                            <small>非アクティブ（非戦闘）時に表示されるNo data to show.を非表示にすることができます。</small>
+                        </label>
+                        <div class="custom-control custom-radio">
+                            <label>
+                                <input type="radio" name="autohide-enabled" value="1" class="custom-control-input" v-model="autoHide">
+                                <span class="custom-control-label">オーバーレイを非表示にする</span>
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <label>
+                                <input type="radio" name="autohide-enabled" value="0" class="custom-control-input" v-model="autoHide">
+                                <span class="custom-control-label">No data to show.を表示する</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <span class="font-weight-bold">ペットの合算</span><br>
+                            <small>エギなどのペットのデータをオーナーに合算させて表示することができます。</small>
+                        </label>
+                        <div class="custom-control custom-radio">
+                            <label>
+                                <input type="radio" name="combinepet-enabled" value="0" class="custom-control-input" v-model="combinePets">
+                                <span class="custom-control-label">しない</span>
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <label>
+                                <input type="radio" name="combinepet-enabled" value="1" class="custom-control-input" v-model="combinePets">
+                                <span class="custom-control-label">する（カーバンクル・エギ・オートタレット・フェアリー）</span>
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <label>
+                                <input type="radio" name="combinepet-enabled" value="2" class="custom-control-input" v-model="combinePets">
+                                <span class="custom-control-label">する（カーバンクル・エギ・オートタレット・フェアリー・チョコボ）</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card mb-2">
+            <div class="card-body">
+                <div class="form-group">
+                    <label>
+                        <span class="font-weight-bold">表示するURL</span><br>
+                        <small>以下のURLを、ACT内Plugins→OverlayPlugin.dll→Mini Parse の「表示するURL」に設定し、［オーバーレイの表示をリロード］をクリックしてください。</small>
+                    </label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" v-model="url" readonly>
+                        <div class="input-group-append"><span id="copy" class="btn btn-primary" data-toggle="popover" data-placement="top" @click="copyUrl">コピー</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container-fluid">
+            <p class="text-center m-0"><span class="text-muted" id="last-update">
+                <script>
+                    var modified = new Date(document.lastModified);
+                    var y = modified.getFullYear();
+                    var m = ('0' + (modified.getMonth() + 1)).slice(-2);
+                    var d = ('0' + modified.getDate()).slice(-2);
+                    document.write('update: ' + y + '-' + m + '-' + d);
+                </script>
+            </span></p>
+        </div>
+    </footer>
+
+    <script>
+    var storage = {
+        get: (key) => {
+            return localStorage.getItem(key);
+        },
+        set: (key, value) => {
+            try {
+                localStorage.setItem(key, value);
+            } catch (e) {
+                console.error(e);
+            }
+        },
+    };
+
+    var app = new Vue({
+        el: '#app',
+        data: {
+            characterName: '',
+            timeout: {
+                enabled: '1',
+                changeSec: false,
+                sec: '15',
+            },
+            autoHide: '0',
+            combinePets: '0',
+        },
+        methods: {
+            copyUrl: function() {
+                var _ = document.createElement('div');
+                _.appendChild(document.createElement('pre')).textContent = this.url;
+                var style = _.style;
+                style.position = 'fixed';
+                style.left = '-100%';
+                document.body.appendChild(_);
+                document.getSelection().selectAllChildren(_);
+                var result = document.execCommand('copy');
+                document.body.removeChild(_);
+
+                var t = 'クリップボードにコピーしました。';
+                if (!result) { t = 'クリップボードへのコピーに失敗しました。'; }
+
+                $('#copy').popover({
+                    trigger: 'manual',
+                    content: t,
+                });
+                $('#copy').popover('show');
+                $('#copy').on('mouseleave', () => {
+                    $('#copy').popover('hide');
+                    $('#copy').off('mouseleave');
+                });
+            },
+        },
+        computed: {
+            url: function() {
+                var base = String(location.origin + location.pathname).replace(/\/[^/]*$/, '/overlay.html');
+                var params = [];
+                // プレイヤーキャラクター名
+                if (this.characterName !== '') {
+                    params.push('name=' + this.characterName);
+                }
+                // オーバーレイのリセット
+                if (this.timeout.enabled === '0') {
+                    params.push('timeout=-1');
+                } else if (this.timeout.changeSec) {
+                    params.push('timeout=' + this.timeout.sec);
+                }
+                // 非アクティブ時の挙動
+                if (this.autoHide !== '0') {
+                    params.push('autohide=' + this.autoHide);
+                }
+                // ペットの合算
+                if (this.combinePets !== '0') {
+                    params.push('pet=' + this.combinePets);
+                }
+                var result = encodeURI(base + (params.length > 0 ? '?' + params.join('&') : ''));
+                return result;
+            },
+        },
+        watch: {
+            characterName: function(val) {
+                storage.set('mpcfg_charactername', val);
+            },
+            timeout: {
+                handler: function(val) {
+                    storage.set('mpcfg_timeoutenabled', val.enabled);
+                    storage.set('mpcfg_timeoutchangesec', val.changeSec);
+                    storage.set('mpcfg_timeoutsec', val.sec);
+                },
+                deep: true,
+            },
+            autoHide: function(val) {
+                storage.set('mpcfg_autohide', val);
+            },
+            combinePets: function(val) {
+                storage.set('mpcfg_combinepets', val);
+            },
+        },
+        mounted: function() {
+            // プレイヤーキャラクター名
+            if (storage.get('mpcfg_charactername') !== null) {
+                this.characterName = storage.get('mpcfg_charactername');
+            } else {
+                storage.set('mpcfg_charactername', this.characterName)
+            }
+            // オーバーレイのリセット(有効/無効)
+            if (storage.get('mpcfg_timeoutenabled') !== null) {
+                this.timeout.enabled = storage.get('mpcfg_timeoutenabled');
+            } else {
+                storage.set('mpcfg_timeoutenabled', this.timeout.enabled)
+            }
+            // オーバーレイのリセット(時間変更)
+            if (storage.get('mpcfg_timeoutchangesec') !== null) {
+                this.timeout.changeSec = (storage.get('mpcfg_timeoutchangesec') === 'true');
+            } else {
+                storage.set('mpcfg_timeoutchangesec', this.timeout.changeSec)
+            }
+            // オーバーレイのリセット(時間)
+            if (storage.get('mpcfg_timeoutsec') !== null) {
+                this.timeout.sec = storage.get('mpcfg_timeoutsec');
+            } else {
+                storage.set('mpcfg_timeoutsec', this.timeout.sec)
+            }
+            // 非アクティブ時の挙動
+            if (storage.get('mpcfg_autohide') !== null) {
+                this.autoHide = storage.get('mpcfg_autohide');
+            } else {
+                storage.set('mpcfg_autohide', this.autoHide)
+            }
+            // ペットの合算
+            if (storage.get('mpcfg_combinepets') !== null) {
+                this.combinePets = storage.get('mpcfg_combinepets');
+            } else {
+                storage.set('mpcfg_combinepets', this.combinePets)
+            }
+        },
+    });
+    </script>
+</body>
+
+</html>
