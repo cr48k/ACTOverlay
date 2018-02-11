@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <title>Miniparse</title>
     <style>
+    [v-cloak] {
+        display: none;
+    }
     * {
         font-family: "Meiryo UI";
         font-size: 11.5px;
@@ -172,10 +175,10 @@
     <div id="miniparse" class="outer" :class="{resizable:!isLocked, hidden:Object.keys(combatant).length===0&&autoHide}" v-cloak>
         <div class="inner">
             <div class="background"></div>
-            <div id="nodata" v-if="Object.keys(combatant).length === 0">
+            <div id="nodata" key="nodata" v-if="Object.keys(combatant).length === 0">
                 No data to show.
             </div>
-            <div id="data" v-else>
+            <div id="data" key="data" v-else>
                 <div id="encounter">
                     [{{ encounter.duration }}] {{ encounter.title }} - {{ encounter.CurrentZoneName }}<br>
                     TotalDPS: <span class="enc">{{ encounter.ENCDPS }}</span> / TotalDamage: <span class="enc">{{ encounter.damage }}</span>
@@ -196,7 +199,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template v-for="(c, i) in combatant" v-if="c.JobOrName !== ''">
+                            <template v-for="c in combatant" :key="c.name" v-if="c.JobOrName !== ''">
                                 <tr class="combatant-row" :class="c.Role" :style="combatantRowBarSize(c)">
                                     <td class="al-c"><div class="jobimg"><img :src="jobIcon(c)"></div></td>
                                     <td class="al-l" :class="c.NameType">{{ c.DisplayName }}</td>
