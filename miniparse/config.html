@@ -11,10 +11,14 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js" integrity="sha256-1Q2q5hg2YXp9fYlM++sIEXOcUb8BRSDUsQ1zXvLBqmA=" crossorigin="anonymous"></script>
     <style>
+    [v-cloak] {
+        display: none;
+    }
     html {
         position: relative;
         min-height: 100%;
         overflow-y: scroll;
+        user-select: none;
     }
     body {
         margin-bottom: 80px;
@@ -40,96 +44,171 @@
     </header>
 
     <main id="app" role="main" class="container-fluid" v-cloak>
-        <div class="card mb-2">
-            <div class="card-body">
-                <form>
-                    <div class="form-group">
-                        <label>
-                            <span class="font-weight-bold">プレイヤーキャラクター名</span><br>
-                            <small>自身のプレイヤーキャラクター名を入力してください。（複数の場合はカンマ区切りで入力）</small>
-                        </label>
-                        <input type="text" style="max-width:40rem;" class="form-control" spellcheck="false" v-model="characterName">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <span class="font-weight-bold">オーバーレイのリセット</span><br>
-                            <small>End Encounter後にNo data to show.が表示されるまでの時間を設定できます。</small>
-                        </label>
-                        <div class="custom-control custom-radio">
-                            <label>
-                                <input type="radio" name="timeout-enabled" value="0" class="custom-control-input" v-model="timeout.enabled">
-                                <span class="custom-control-label">無効</span>
-                            </label>
-                        </div>
-                        <div class="custom-control custom-radio">
-                            <label>
-                                <input type="radio" name="timeout-enabled" value="1" class="custom-control-input" v-model="timeout.enabled">
-                                <span class="custom-control-label">有効</span>
-                            </label>
-                        </div>
-                        <div style="margin-left:1.5rem;" class="form-group">
-                            <div class="custom-control custom-checkbox">
-                                <label>
-                                    <input type="checkbox" class="custom-control-input" v-model="timeout.changeSec" :disabled="timeout.enabled==='0'">
-                                    <span class="custom-control-label">リセットまでの時間を変更する</span>
-                                </label>
-                            </div>
-                            <div style="margin-left:1.5rem;" class="form-group form-inline">
-                                <label :style="timeout.enabled==='0'||!timeout.changeSec?'color:#868e96':''">
-                                    リセットまでの時間:
-                                    <input type="number" name="timeout-sec" style="width:4rem;" class="form-control ml-3 mr-1" v-model="timeout.sec" :disabled="timeout.enabled==='0'||!timeout.changeSec">
-                                    秒
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <span class="font-weight-bold">非アクティブ時の挙動</span><br>
-                            <small>非アクティブ（非戦闘）時に表示されるNo data to show.を非表示にすることができます。</small>
-                        </label>
-                        <div class="custom-control custom-radio">
-                            <label>
-                                <input type="radio" name="autohide-enabled" value="1" class="custom-control-input" v-model="autoHide">
-                                <span class="custom-control-label">オーバーレイを非表示にする</span>
-                            </label>
-                        </div>
-                        <div class="custom-control custom-radio">
-                            <label>
-                                <input type="radio" name="autohide-enabled" value="0" class="custom-control-input" v-model="autoHide">
-                                <span class="custom-control-label">No data to show.を表示する</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <span class="font-weight-bold">ペットの合算</span><br>
-                            <small>エギなどのペットのデータをオーナーに合算させて表示することができます。</small>
-                        </label>
-                        <div class="custom-control custom-radio">
-                            <label>
-                                <input type="radio" name="combinepet-enabled" value="0" class="custom-control-input" v-model="combinePets">
-                                <span class="custom-control-label">しない</span>
-                            </label>
-                        </div>
-                        <div class="custom-control custom-radio">
-                            <label>
-                                <input type="radio" name="combinepet-enabled" value="1" class="custom-control-input" v-model="combinePets">
-                                <span class="custom-control-label">する（カーバンクル・エギ・オートタレット・フェアリー）</span>
-                            </label>
-                        </div>
-                        <div class="custom-control custom-radio">
-                            <label>
-                                <input type="radio" name="combinepet-enabled" value="2" class="custom-control-input" v-model="combinePets">
-                                <span class="custom-control-label">する（カーバンクル・エギ・オートタレット・フェアリー・チョコボ）</span>
-                            </label>
-                        </div>
-                    </div>
-                </form>
+        <ul class="nav nav-tabs">
+            <li class="nav-item"><a href="#general" class="nav-link active" data-toggle="tab">一般</a></li>
+            <li class="nav-item"><a href="#appearance" class="nav-link" data-toggle="tab">スタイル</a></li>
+            <li class="nav-item"><a href="#behavior" class="nav-link" data-toggle="tab">機能</a></li>
+            <li class="nav-item"><a href="#preview" class="nav-link" data-toggle="tab">プレビュー</a></li>
+        </ul>
+        <div class="tab-content">
+            <!-- 一般 -->
+            <div id="general" class="card-body tab-pane active">
+                <div class="form-group">
+                    <label>
+                        <span class="font-weight-bold">プレイヤーキャラクター名</span><br>
+                        <small>自身のプレイヤーキャラクター名を入力してください。（複数の場合はカンマ区切りで入力）</small>
+                    </label>
+                    <input type="text" style="max-width:40rem;" class="form-control" spellcheck="false" v-model="characterName">
+                </div>
+                <div class="mt-5">
+                    <h6>更新情報</h6>
+                    <p><span class="font-weight-bold">2018-02-12</span></p>
+                    overlay
+                    <ul>
+                        <li>動作を改善しました。</li>
+                    </ul>
+                    config
+                    <ul>
+                        <li>設定項目を分割しました。</li>
+                        <li>DPSグラフ機能を無効化できる設定を追加しました。</li>
+                        <li>自身のDPSグラフのみ色を変更できる設定を追加しました。</li>
+                    </ul>
+                    <p><span class="font-weight-bold">2018-02-04</span></p>
+                    リリース
+                </div>
             </div>
-        </div>
-        <div class="card mb-2">
-            <div class="card-body">
+            <!-- スタイル -->
+            <div id="appearance" class="card-body tab-pane">
+                <div class="form-group">
+                    <label>
+                        <span class="font-weight-bold">DPSのグラフ表示</span><br>
+                        <small>DPSをグラフ表示することができます。</small>
+                    </label>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="dpsgraph-enabled" value="0" class="custom-control-input" v-model="dpsGraph">
+                            <span class="custom-control-label">設定しない</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="dpsgraph-enabled" value="1" class="custom-control-input" v-model="dpsGraph">
+                            <span class="custom-control-label">設定する</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <span class="font-weight-bold">DPSグラフの背景色</span><br>
+                        <small>自身のDPSグラフの背景色を設定することができます。<br>(DPSのグラフ表示設定が有効な場合のみ機能します)</small>
+                    </label>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="mydpsbg-enabled" value="0" class="custom-control-input" v-model="myDpsGraph.enabled">
+                            <span class="custom-control-label">設定しない</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="mydpsbg-enabled" value="1" class="custom-control-input" v-model="myDpsGraph.enabled">
+                            <span class="custom-control-label">設定する</span>
+                        </label>
+                    </div>
+                    <div style="margin-left:1.5rem;" class="form-group">
+                        <label class="form-inline" :style="myDpsGraph.enabled==='0'?'color:#868e96':''">
+                            背景色:
+                            <!--<input type="text" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#dcf004" name="mydpsbg-color" style="width:7rem;" :style="{'background':myDpsGraphColor}" class="form-control ml-3 mr-1" v-model="myDpsGraph.color" @focusout="myDpsGraph.color=validateColor(myDpsGraph.color,$event)">-->
+                            <input type="color" class="form-control" v-model="myDpsGraph.color" style="width:8rem;height:2.5rem;margin-left:1rem" :disabled="myDpsGraph.enabled==='0'">
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <!-- 機能 -->
+            <div id="behavior" class="card-body tab-pane">
+                <div class="form-group">
+                    <label>
+                        <span class="font-weight-bold">オーバーレイのリセット</span><br>
+                        <small>End Encounter後にNo data to show.が表示されるまでの時間を設定できます。</small>
+                    </label>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="timeout-enabled" value="0" class="custom-control-input" v-model="timeout.enabled">
+                            <span class="custom-control-label">無効</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="timeout-enabled" value="1" class="custom-control-input" v-model="timeout.enabled">
+                            <span class="custom-control-label">有効</span>
+                        </label>
+                    </div>
+                    <div style="margin-left:1.5rem;" class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <label>
+                                <input type="checkbox" class="custom-control-input" v-model="timeout.changeSec" :disabled="timeout.enabled==='0'">
+                                <span class="custom-control-label">リセットまでの時間を変更する</span>
+                            </label>
+                        </div>
+                        <div style="margin-left:1.5rem;" class="form-group form-inline">
+                            <label :style="timeout.enabled==='0'||!timeout.changeSec?'color:#868e96':''">
+                                リセットまでの時間:
+                                <input type="number" name="timeout-sec" style="width:4rem;" class="form-control ml-3 mr-1" v-model="timeout.sec" :disabled="timeout.enabled==='0'||!timeout.changeSec">
+                                秒
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <span class="font-weight-bold">非アクティブ時の挙動</span><br>
+                        <small>非アクティブ（非戦闘）時に表示されるNo data to show.を非表示にすることができます。</small>
+                    </label>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="autohide-enabled" value="1" class="custom-control-input" v-model="autoHide">
+                            <span class="custom-control-label">オーバーレイを非表示にする</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="autohide-enabled" value="0" class="custom-control-input" v-model="autoHide">
+                            <span class="custom-control-label">No data to show.を表示する</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <span class="font-weight-bold">ペットの合算</span><br>
+                        <small>エギなどのペットのデータをオーナーに合算させて表示することができます。</small>
+                    </label>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="combinepet-enabled" value="0" class="custom-control-input" v-model="combinePets">
+                            <span class="custom-control-label">しない</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="combinepet-enabled" value="1" class="custom-control-input" v-model="combinePets">
+                            <span class="custom-control-label">する（カーバンクル・エギ・オートタレット・フェアリー）</span>
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <label>
+                            <input type="radio" name="combinepet-enabled" value="2" class="custom-control-input" v-model="combinePets">
+                            <span class="custom-control-label">する（カーバンクル・エギ・オートタレット・フェアリー・チョコボ）</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <!-- プレビュー -->
+            <div id="preview" class="card-body tab-pane">
+                <div class="form-group">
+                    <label>
+                        <span class="font-weight-bold">オーバーレイのプレビュー</span><br>
+                        <small>プレビューは現在利用できません。</small>
+                    </label>
+                </div>
                 <div class="form-group">
                     <label>
                         <span class="font-weight-bold">表示するURL</span><br>
@@ -183,6 +262,11 @@
             },
             autoHide: '0',
             combinePets: '0',
+            dpsGraph: '1',
+            myDpsGraph: {
+                enabled: '0',
+                color: '#dcf004',
+            },
         },
         methods: {
             copyUrl: function() {
@@ -209,6 +293,14 @@
                     $('#copy').off('mouseleave');
                 });
             },
+            validateColor: function(ov, e) {
+                // 未完成
+                var regex = new RegExp(e.target.pattern);
+                var r = regex.exec(e.target.value);
+                var result = r ? r[0] : '#dcf004';
+                console.log(result);
+                return e.target.value = (result) ? result[0] : '#dcf004';
+            },
         },
         computed: {
             url: function() {
@@ -232,7 +324,25 @@
                 if (this.combinePets !== '0') {
                     params.push('pet=' + this.combinePets);
                 }
+                // DPSグラフの表示
+                if (this.dpsGraph === '0') {
+                    params.push('graph=' + this.dpsGraph);
+                }
+                // DPSグラフの背景色
+                if (this.dpsGraph !== '0' && this.myDpsGraph.enabled !== '0') {
+                    params.push('you=' + this.myDpsGraph.color.replace('#', ''));
+                }
                 var result = encodeURI(base + (params.length > 0 ? '?' + params.join('&') : ''));
+                return result;
+            },
+            myDpsGraphColor: function() {
+                var _ = this.myDpsGraph.color;
+                var r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(_);
+                var c = r ? { r: parseInt(r[1], 16), g: parseInt(r[2], 16), b: parseInt(r[3], 16) } : null;
+                var result = 'rgba(0, 0, 0, 0)';
+                if (c !== null) {
+                    result = 'rgba(' + c.r + ', ' + c.g + ', ' + c.b + ', 0.3)';
+                }
                 return result;
             },
         },
@@ -291,6 +401,24 @@
                 this.combinePets = storage.get('mpcfg_combinepets');
             } else {
                 storage.set('mpcfg_combinepets', this.combinePets)
+            }
+            // DPSのグラフ表示
+            if (storage.get('mpcfg_dpsgraph') !== null) {
+                this.dpsGraph = storage.get('mpcfg_dpsgraph');
+            } else {
+                storage.set('mpcfg_dpsgraph', this.dpsGraph);
+            }
+            // DPSグラフの背景色(有効/無効)
+            if (storage.get('mpcfg_mydpsgraphenabled') !== null) {
+                this.myDpsGraph.enabled = storage.get('mpcfg_mydpsgraphenabled');
+            } else {
+                storage.set('mpcfg_mydpsgraphenabled', this.myDpsGraph.enabled);
+            }
+            // DPSグラフの背景色(色設定)
+            if (storage.get('mpcfg_mydpsgraphcolor') !== null) {
+                this.myDpsGraph.color = storage.get('mpcfg_mydpsgraphcolor');
+            } else {
+                storage.set('mpcfg_mydpsgraphcolor', this.myDpsGraph.color);
             }
         },
     });

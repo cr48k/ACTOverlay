@@ -108,7 +108,7 @@
         background-blend-mode: soft-light;*/
     }
 
-    .combatant-row.tank {
+    /*.combatant-row.tank {
         background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(41, 112, 243, 0.3)), to(rgba(24, 24, 24, 0.0)));
     }
     .combatant-row.healer {
@@ -122,7 +122,7 @@
     }
     .combatant-row.you {
         background: -webkit-gradient(linear, left top, right top, color-stop(0.85, rgba(220, 240, 4, 0.3)), to(rgba(24, 24, 24, 0.0)));
-    }
+    }*/
     .combatant-row {
         background-attachment: fixed !important;
         background-repeat: no-repeat !important;
@@ -199,14 +199,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template v-for="c in combatant" :key="c.name" v-if="c.JobOrName !== ''">
-                                <tr class="combatant-row" :class="c.Role" :style="combatantRowBarSize(c)">
+                            <template v-for="c in combatant" v-if="c.JobOrName!==''">
+                                <tr class="combatant-row" :key="c.name" :class="dpsGraph?c.Role:''" :style="dpsGraph?combatantRowBarStyle(c):''">
                                     <td class="al-c"><div class="jobimg"><img :src="jobIcon(c)"></div></td>
                                     <td class="al-l" :class="c.NameType">{{ c.DisplayName }}</td>
                                     <td class="al-r">{{ c.encdps }}</td>
                                     <!--<td class="al-r">{{ c.enchps }}</td>-->
-                                    <td class="al-r" style="padding-right:10px;" :class="{'red-if-gt-0': c.misses > 0}">{{ c.misses }}</td>
-                                    <td class="al-r" style="padding-right:10px;" :class="{'red-if-gt-0': c.deaths > 0}">{{ c.deaths }}</td>
+                                    <td class="al-r" style="padding-right:10px;" :class="{'red-if-gt-0':c.misses>0}">{{ c.misses }}</td>
+                                    <td class="al-r" style="padding-right:10px;" :class="{'red-if-gt-0':c.deaths>0}">{{ c.deaths }}</td>
                                     <td class="al-r">{{ c.CritHitRate }}</td>
                                     <td class="al-r">{{ c.DirectHitRate }}</td>
                                     <td class="al-r">{{ c.CritDirectHitRate }}</td>
@@ -383,7 +383,7 @@
         },
         Role: function (c) {
             var result = 'other';
-            if (GET.you === '1' && c.NameType === 'you') {
+            if (GET.you !== undefined && c.NameType === 'you') {
                 result = 'you';
             } else if (c.Job.match(new RegExp(jobList.tank.join('|'), 'g'))) {
                 result = 'tank';
@@ -629,11 +629,37 @@
                     cancel: () => { clearTimeout(timeout); },
                 };
             },
+            // DPSグラフのスタイル
+            combatantRowBarStyle: function(c) {
+                var result = this.combatantRowBarSize(c) + this.combatantRowBarColor(c);
+                return result;
+            },
             // DPSグラフの幅
             combatantRowBarSize: function(c) {
                 var topd = this.combatant[Object.keys(this.combatant)[0]].encdps;
                 var d = c.encdps;
-                var result = 'background-size:' + (parseInt(d) * 100 / parseInt(topd)) + '% 100%';
+                var result = 'background-size:' + (parseInt(d) * 100 / parseInt(topd)) + '% 100%;';
+                return result;
+            },
+            // DPSグラフの色
+            combatantRowBarColor: function(c) {
+                var r = c.Role;
+                var color = ((r) => {
+                    switch (r) {
+                        case 'you':
+                            return this.myDpsGraphColor;
+                        case 'tank':
+                            return 'rgba(41, 112, 243, 0.3)';
+                        case 'healer':
+                            return 'rgba(107, 240, 86, 0.3)';
+                        case 'dps':
+                            return 'rgba(200, 3, 8, 0.3)';
+                        case 'other':
+                        default:
+                            return 'rgba(255, 255, 255, 0.3)';
+                    }
+                })(r);
+                var result = 'background: -webkit-gradient(linear, left top, right top, color-stop(0.85, ' + color + '), to(rgba(24, 24, 24, 0.0)));';
                 return result;
             },
             // ジョブアイコン
@@ -669,6 +695,29 @@
                 var f = GET.autohide;
                 var result = false;
                 if (f !== undefined && f === '1') { result = true; }
+                return result;
+            },
+            dpsGraph: function() {
+                var g = GET.graph;
+                var result = true;
+                if (g !== undefined && g === '0') { result = false; }
+                return result;
+            },
+            myDpsGraph: function() {
+                var u = GET.you;
+                var r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+                var result = false;
+                if (u !== undefined && r.test(u)) { result = true; }
+                return result;
+            },
+            myDpsGraphColor: function() {
+                var u = GET.you;
+                var r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(u);
+                var c = r ? { r: parseInt(r[1], 16), g: parseInt(r[2], 16), b: parseInt(r[3], 16) } : null;
+                var result = 'rgba(0, 0, 0, 0)';
+                if (c !== null) {
+                    result = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.3)';
+                }
                 return result;
             },
         },
