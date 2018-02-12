@@ -275,6 +275,7 @@
                 var style = _.style;
                 style.position = 'fixed';
                 style.left = '-100%';
+                style.userSelect = 'text';
                 document.body.appendChild(_);
                 document.getSelection().selectAllChildren(_);
                 var result = document.execCommand('copy');
@@ -292,14 +293,6 @@
                     $('#copy').popover('hide');
                     $('#copy').off('mouseleave');
                 });
-            },
-            validateColor: function(ov, e) {
-                // 未完成
-                var regex = new RegExp(e.target.pattern);
-                var r = regex.exec(e.target.value);
-                var result = r ? r[0] : '#dcf004';
-                console.log(result);
-                return e.target.value = (result) ? result[0] : '#dcf004';
             },
         },
         computed: {
