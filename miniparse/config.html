@@ -357,6 +357,13 @@
             combinePets: function(val) {
                 storage.set('mpcfg_combinepets', val);
             },
+            myDpsGraph: {
+                handler: function(val) {
+                    storage.set('mpcfg_mydpsgraphenabled', val.enabled);
+                    storage.set('mpcfg_mydpsgraphcolor', val.color);
+                },
+                deep: true,
+            }
         },
         mounted: function() {
             // プレイヤーキャラクター名
