@@ -631,14 +631,7 @@
             },
             // DPSグラフのスタイル
             combatantRowBarStyle: function(c) {
-                var result = this.combatantRowBarSize(c) + this.combatantRowBarColor(c);
-                return result;
-            },
-            // DPSグラフの幅
-            combatantRowBarSize: function(c) {
-                var topd = this.combatant[Object.keys(this.combatant)[0]].encdps;
-                var d = c.encdps;
-                var result = 'background-size:' + (parseInt(d) * 100 / parseInt(topd)) + '% 100%;';
+                var result = this.combatantRowBarColor(c) + this.combatantRowBarSize(c);
                 return result;
             },
             // DPSグラフの色
@@ -660,6 +653,13 @@
                     }
                 })(r);
                 var result = 'background: -webkit-gradient(linear, left top, right top, color-stop(0.85, ' + color + '), to(rgba(24, 24, 24, 0.0)));';
+                return result;
+            },
+            // DPSグラフの幅
+            combatantRowBarSize: function(c) {
+                var topd = this.combatant[Object.keys(this.combatant)[0]].encdps;
+                var d = c.encdps;
+                var result = 'background-size:' + (parseInt(d) * 100 / parseInt(topd)) + '% 100%;';
                 return result;
             },
             // ジョブアイコン
