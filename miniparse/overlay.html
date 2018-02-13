@@ -739,6 +739,7 @@
             },
         },
         mounted: function() {
+            console.log('Overlay loaded.');
             document.addEventListener('onOverlayDataUpdate', this.dataUpdate);
             document.addEventListener('onOverlayStateUpdate', this.stateUpdate);
         },
