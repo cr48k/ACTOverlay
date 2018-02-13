@@ -722,7 +722,8 @@
             },
         },
         watch: {
-            isActive: function(nv, ov) {
+            isActive: function(nv) {
+                nv = nv === true || nv === "true";
                 if (nv) {
                     if (this.overlayTimeout !== null) {
                         this.overlayTimeout.cancel();
