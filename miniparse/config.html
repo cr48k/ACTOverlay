@@ -24,22 +24,14 @@
         margin-bottom: 80px;
         padding-top:5rem;
     }
-    .footer {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        /* Set the fixed height of the footer here */
-        height: 60px;
-        line-height: 60px; /* Vertically center the text there */
-        background-color: #f5f5f5;
-    }
     </style>
 </head>
 
 <body>
     <header>
         <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-            <a class="navbar-brand" href="">Miniparse Config</a>
+            <span class="navbar-brand">Miniparse Config</span>
+            <span class="text-light" id="version"></span>
         </nav>
     </header>
 
@@ -61,7 +53,20 @@
                     <input type="text" style="max-width:40rem;" class="form-control" spellcheck="false" v-model="characterName">
                 </div>
                 <div class="mt-5">
+                    <h6>対応環境</h6>
+                    <p>OverlayPlugin &gt;&equals; 0.3.3.9</p>
+                    <ul>
+                        <li><a href="https://github.com/RainbowMage/OverlayPlugin">RainbowMage/OverlayPlugin</a> (0.3.3.9, recommended)</li>
+                        <li><a href="https://github.com/hibiyasleep/OverlayPlugin">hibiyasleep/OverlayPlugin</a> (0.3.4.0)</li>
+                    </ul>
+                </div>
+                <div class="mt-5">
                     <h6>更新情報</h6>
+                    <p><span class="font-weight-bold">2018-02-14</span></p>
+                    config
+                    <ul>
+                        <li>OverlayPluginのページへのリンクを追加しました。</li>
+                    </ul>
                     <p><span class="font-weight-bold">2018-02-12</span></p>
                     overlay
                     <ul>
@@ -100,7 +105,7 @@
                 <div class="form-group">
                     <label>
                         <span class="font-weight-bold">DPSグラフの背景色</span><br>
-                        <small>自身のDPSグラフの背景色を設定することができます。<br>(DPSのグラフ表示設定が有効な場合のみ機能します)</small>
+                        <small>自身のDPSグラフの背景色を設定することができます。（DPSのグラフ表示設定が有効な場合のみ機能します）</small>
                     </label>
                     <div class="custom-control custom-radio">
                         <label>
@@ -117,7 +122,6 @@
                     <div style="margin-left:1.5rem;" class="form-group">
                         <label class="form-inline" :style="myDpsGraph.enabled==='0'?'color:#868e96':''">
                             背景色:
-                            <!--<input type="text" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#dcf004" name="mydpsbg-color" style="width:7rem;" :style="{'background':myDpsGraphColor}" class="form-control ml-3 mr-1" v-model="myDpsGraph.color" @focusout="myDpsGraph.color=validateColor(myDpsGraph.color,$event)">-->
                             <input type="color" class="form-control" v-model="myDpsGraph.color" style="width:8rem;height:2.5rem;margin-left:1rem" :disabled="myDpsGraph.enabled==='0'">
                         </label>
                     </div>
@@ -128,7 +132,7 @@
                 <div class="form-group">
                     <label>
                         <span class="font-weight-bold">オーバーレイのリセット</span><br>
-                        <small>End Encounter後にNo data to show.が表示されるまでの時間を設定できます。</small>
+                        <small>End Encounter（ACTでの戦闘終了）後にオーバーレイに表示されているデータをクリアするまでの時間を設定できます。</small>
                     </label>
                     <div class="custom-control custom-radio">
                         <label>
@@ -223,21 +227,15 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="container-fluid">
-            <p class="text-center m-0"><span class="text-muted" id="last-update">
-                <script>
-                    var modified = new Date(document.lastModified);
-                    var y = modified.getFullYear();
-                    var m = ('0' + (modified.getMonth() + 1)).slice(-2);
-                    var d = ('0' + modified.getDate()).slice(-2);
-                    document.write('update: ' + y + '-' + m + '-' + d);
-                </script>
-            </span></p>
-        </div>
-    </footer>
-
     <script>
+    (() => {
+        var modified = new Date(document.lastModified);
+        var y = modified.getFullYear();
+        var m = ('0' + (modified.getMonth() + 1)).slice(-2);
+        var d = ('0' + modified.getDate()).slice(-2);
+        document.getElementById('version').innerText = 'update: ' + y + '-' + m + '-' + d;
+    })();
+
     var storage = {
         get: (key) => {
             return localStorage.getItem(key);
