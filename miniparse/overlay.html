@@ -480,7 +480,7 @@
                     data = this.combinePets(data);
                 }
                 // データをセット
-                this.isActive = data.isActive;
+                this.isActive = data.isActive === true || data.isActive === "true";
                 if (this.isActive === true || isActive !== null || GET.debug === '1') {
                     this.encounter = data.Encounter;
                     this.combatant = data.Combatant;
@@ -723,7 +723,6 @@
         },
         watch: {
             isActive: function(nv) {
-                nv = nv === true || nv === "true";
                 if (nv) {
                     if (this.overlayTimeout !== null) {
                         this.overlayTimeout.cancel();
