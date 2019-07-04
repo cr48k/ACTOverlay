@@ -687,7 +687,9 @@
                 var l = (GET.name !== undefined ? GET.name : '');
                 var result = [];
                 for (var i in ls = l.split(',')) {
-                    result.push(ls[i].trim());
+                    if (ls[i] != '') {
+                        result.push(ls[i].trim());
+                    }
                 }
                 return result;
             },
