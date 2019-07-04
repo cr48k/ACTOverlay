@@ -189,8 +189,8 @@
                             <tr>
                                 <th class="al-c job" style="width:22px;"></th>
                                 <th class="al-l" style="width:100%;">Name</th>
-                                <th class="al-r" style="width:40px;padding-right:15px;">DPS</th>
-                                <!--<th class="al-c" style="width:60px;">HPS</th>-->
+                                <th class="al-r" style="width:40px;padding-right:18px;">DPS</th>
+                                <!-- <th class="al-c" style="width:60px;">HPS</th> -->
                                 <th class="al-c" style="width:35px;">Miss</th>
                                 <th class="al-r" style="width:35px;">Death</th>
                                 <th class="al-c" style="width:45px;">Crit</th>
@@ -204,7 +204,7 @@
                                     <td class="al-c"><div class="jobimg"><img :src="jobIcon(c)"></div></td>
                                     <td class="al-l" :class="c.NameType">{{ c.DisplayName }}</td>
                                     <td class="al-r">{{ c.encdps }}</td>
-                                    <!--<td class="al-r">{{ c.enchps }}</td>-->
+                                    <!-- <td class="al-r">{{ c.enchps }}</td> -->
                                     <td class="al-r" style="padding-right:10px;" :class="{'red-if-gt-0':c.misses>0}">{{ c.misses }}</td>
                                     <td class="al-r" style="padding-right:10px;" :class="{'red-if-gt-0':c.deaths>0}">{{ c.deaths }}</td>
                                     <td class="al-r">{{ c.CritHitRate }}</td>
@@ -390,9 +390,10 @@
                 { regex: /^オートタレット・ルーク/, name: 'Rook' },
                 { regex: /^オートタレット・ビショップ/, name: 'Bishop' },
                 { regex: /^[A-Z][a-z'-]+ \([A-Z][a-z'-]+ [A-Z][a-z'-]+\)$/, name: 'Chocobo' },
-                { regex: /^分身/, name: 'PetD' },
-                { regex: /^デミ・バハムート/, name: 'PetD' },
                 { regex: /^英雄の影身/, name: 'PetD' },
+                { regex: /^分身/, name: 'PetD' },
+                { regex: /^オートマトン・クイーン/, name: 'PetD' },
+                { regex: /^デミ・バハムート/, name: 'PetD' },
                 { regex: /^セラフィム/, name: 'PetH' },
                 { regex: /^アーサリースター/, name: 'PetH' },
             ];
