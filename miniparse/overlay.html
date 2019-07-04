@@ -169,6 +169,7 @@
     }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js" integrity="sha256-1Q2q5hg2YXp9fYlM++sIEXOcUb8BRSDUsQ1zXvLBqmA=" crossorigin="anonymous"></script>
+    <script src="ActXiv.js"></script>
 </head>
 
 <body>
@@ -550,6 +551,7 @@
                     // 条件
                     if (c.Owner === null) { continue; }
                     if (c.NameType === 'chocobo' && GET.pet !== '2') { continue; }
+                    if (c.NameType === 'npc') { continue; }
                     var oi = (this.myCharacterName.includes(c.Owner) && data.Combatant['YOU'] !== undefined ? 'YOU' : c.Owner);
                     var o = data.Combatant[oi];
                     if (o === undefined) { continue; }
@@ -776,6 +778,11 @@
             document.removeEventListener('onOverlayStateUpdate', this.stateUpdate);
         },
     });
+
+    // デバッグ用
+    if (miniparse.debugMode) {
+        miniparse.dataUpdate({"detail": ActXiv[6]});
+    }
     </script>
 </body>
 </html>

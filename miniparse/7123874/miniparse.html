@@ -550,6 +550,7 @@
                     // 条件
                     if (c.Owner === null) { continue; }
                     if (c.NameType === 'chocobo' && GET.pet !== '2') { continue; }
+                    if (c.NameType === 'npc') { continue; }
                     var oi = (this.myCharacterName.includes(c.Owner) && data.Combatant['YOU'] !== undefined ? 'YOU' : c.Owner);
                     var o = data.Combatant[oi];
                     if (o === undefined) { continue; }
