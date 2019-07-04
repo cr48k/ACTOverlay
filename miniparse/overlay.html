@@ -362,6 +362,7 @@
             }
             return result;
         },
+        // 表示名
         DisplayName: function (c) {
             var result = c.name;
             // if (c.NameType === 'pet') {
@@ -369,6 +370,7 @@
             // }
             return result;
         },
+        // ジョブ名
         JobOrName: function (c) {
             var result = c.Job || c.name;
             var jn = [
@@ -387,6 +389,7 @@
             }
             return result;
         },
+        // ロール名
         Role: function (c) {
             var result = 'other';
             if (GET.you !== undefined && c.NameType === 'you') {
@@ -400,6 +403,7 @@
             }
             return result;
         },
+        // クリティカル率（再計算）
         CritHitRate: function (c) {
             var swings = parseInt(c.swings);
             var crithits = parseInt(c.crithits) - parseInt(c.CritDirectHitCount);
@@ -407,6 +411,7 @@
             var result = rate.toFixed(1) + '%';
             return result;
         },
+        // ダイレクトヒット率（再計算）
         DirectHitRate: function (c) {
             var swings = parseInt(c.swings);
             var directhits = parseInt(c.DirectHitCount) - parseInt(c.CritDirectHitCount);
@@ -414,6 +419,7 @@
             var result = rate.toFixed(1) + '%';
             return result;
         },
+        // クリティカル+ダイレクトヒット率（再計算）
         CritDirectHitRate: function (c) {
             var swings = parseInt(c.swings);
             var critdirecthits = parseInt(c.CritDirectHitCount);
@@ -421,10 +427,12 @@
             var result = rate.toFixed(1) + '%';
             return result;
         },
+        // 最大与ダメージスキル
         MaxHitSkill: function (c) {
             var result = c.maxhit.replace(/-(\d{1,3},)*\d{1,3}$/, '');
             return result;
         },
+        // 最大与ダメージ量
         MaxHitDamage: function (c) {
             var result = c.MAXHIT.replace(/,/g, '');
             return result;
